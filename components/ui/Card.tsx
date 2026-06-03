@@ -15,9 +15,9 @@ export default function Card({ children, hover = false, glow = false, className 
     <motion.div
       whileHover={hover ? { y: -4, scale: 1.01 } : undefined}
       className={`
-        relative rounded-2xl border border-gray-200 bg-white shadow-sm
-        ${hover ? "transition-shadow duration-300 hover:shadow-md hover:border-gray-300" : ""}
-        ${glow ? "shadow-lg shadow-violet-100" : ""}
+        relative rounded-2xl border border-slate-200 bg-white shadow-sm
+        ${hover ? "transition-shadow duration-300 hover:shadow-md hover:border-slate-300" : ""}
+        ${glow ? "shadow-lg shadow-sky-100" : ""}
         ${className}
       `}
       {...props}

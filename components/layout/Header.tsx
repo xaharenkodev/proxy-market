@@ -1,259 +1,221 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Menu, X, Wallet, Plus, ChevronDown, LogOut, User } from "lucide-react";
-import Container from "./Container";
+import { AnimatePresence, motion } from "framer-motion";
+import { ChevronDown, DatabaseZap, LogOut, Menu, User, Wallet, X } from "lucide-react";
 import Button from "@/components/ui/Button";
-import MobileMenu from "./MobileMenu";
-import { useBalance } from "@/context/BalanceContext";
+import Container from "./Container";
+import CurrencySwitcher from "@/components/marketing/CurrencySwitcher";
+import { headerNavigation, productNavigation } from "@/config/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { siteConfig, SupportedCurrency } from "@/config/site";
-import { InstagramIcon, TikTokIcon, YoutubeIcon } from "@/components/ui/SocialIcons";
-
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/how-it-works", label: "How It Works" },
-  { href: "/faq", label: "FAQ" },
-];
-
-const serviceDropdown = [
-  {
-    platform: "Instagram",
-    icon: InstagramIcon,
-    links: [
-      { href: "/services/instagram/likes", label: "Instagram Likes" },
-      { href: "/services/instagram/followers", label: "Instagram Followers" },
-      { href: "/services/instagram/views", label: "Instagram Views" },
-    ],
-  },
-  {
-    platform: "TikTok",
-    icon: TikTokIcon,
-    links: [
-      { href: "/services/tiktok/likes", label: "TikTok Likes" },
-      { href: "/services/tiktok/followers", label: "TikTok Followers" },
-      { href: "/services/tiktok/views", label: "TikTok Views" },
-    ],
-  },
-  {
-    platform: "YouTube",
-    icon: YoutubeIcon,
-    links: [
-      { href: "/services/youtube/likes", label: "YouTube Likes" },
-      { href: "/services/youtube/subscribers", label: "YouTube Subscribers" },
-      { href: "/services/youtube/views", label: "YouTube Views" },
-    ],
-  },
-];
+import { useBalance } from "@/context/BalanceContext";
 
 export default function Header() {
-  const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [servicesOpen, setServicesOpen] = useState(false);
+  const [productsOpen, setProductsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
-  const { formattedBalance, displayCurrency, setDisplayCurrency } = useBalance();
-  const { isLoggedIn, user, logout } = useAuth();
+  const { isLoggedIn, logout } = useAuth();
+  const { formattedBalance } = useBalance();
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    setMobileOpen(false);
-    setServicesOpen(false);
+    window.setTimeout(() => {
+      setMobileOpen(false);
+      setProductsOpen(false);
+    }, 0);
   }, [pathname]);
 
   useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
-        setServicesOpen(false);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setProductsOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const isServiceActive = pathname.startsWith("/services");
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
+
+  if (pathname.startsWith("/dashboard")) return null;
 
   return (
-    <>
-      <motion.header
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className={`
-          fixed top-0 left-0 right-0 z-50 transition-all duration-300
-          ${scrolled
-            ? "bg-white/80 backdrop-blur-xl border-b border-gray-200/60 shadow-sm"
-            : "bg-transparent"
-          }
-        `}
-      >
-        <Container>
-          <nav className="flex h-16 items-center justify-between lg:h-20">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/25 transition-shadow group-hover:shadow-violet-500/40">
-                <Zap size={18} className="text-white" />
-              </div>
-              <span className="text-xl font-bold text-gray-900">
-                Grow<span className="text-violet-600">Pulse</span>
-              </span>
-            </Link>
-
-            {/* Desktop Nav */}
-            <div className="hidden items-center gap-1 lg:flex">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`
-                    relative rounded-lg px-4 py-2 text-sm font-medium transition-colors
-                    ${pathname === link.href
-                      ? "text-gray-900"
-                      : "text-gray-500 hover:text-gray-900"
-                    }
-                  `}
-                >
-                  {pathname === link.href && (
-                    <motion.div
-                      layoutId="activeNav"
-                      className="absolute inset-0 rounded-lg bg-gray-100"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10">{link.label}</span>
-                </Link>
-              ))}
-
-              {/* Services Dropdown */}
-              <div ref={dropdownRef} className="relative">
-                <button
-                  onClick={() => setServicesOpen(!servicesOpen)}
-                  className={`
-                    relative flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors
-                    ${isServiceActive ? "text-gray-900" : "text-gray-500 hover:text-gray-900"}
-                  `}
-                >
-                  {isServiceActive && (
-                    <motion.div
-                      layoutId="activeNav"
-                      className="absolute inset-0 rounded-lg bg-gray-100"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10">Services</span>
-                  <ChevronDown size={14} className={`relative z-10 transition-transform ${servicesOpen ? "rotate-180" : ""}`} />
-                </button>
-
-                <AnimatePresence>
-                  {servicesOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 8 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute left-0 top-full mt-2 w-[520px] rounded-2xl border border-gray-200 bg-white p-4 shadow-xl shadow-gray-200/50"
-                    >
-                      <div className="grid grid-cols-3 gap-4">
-                        {serviceDropdown.map(({ platform, icon: Icon, links }) => (
-                          <div key={platform}>
-                            <div className="flex items-center gap-2 mb-2 px-2">
-                              <Icon className="h-4 w-4 text-gray-400" />
-                              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{platform}</span>
-                            </div>
-                            <div className="flex flex-col">
-                              {links.map((link) => (
-                                <Link
-                                  key={link.href}
-                                  href={link.href}
-                                  className={`rounded-lg px-2 py-2 text-sm transition-colors ${
-                                    pathname === link.href
-                                      ? "bg-violet-50 text-violet-700 font-medium"
-                                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                                  }`}
-                                >
-                                  {link.label}
-                                </Link>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
+    <header className="fixed left-0 right-0 top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl">
+      <div className="mx-auto w-full max-w-[1520px] px-4 sm:px-6 lg:px-10">
+        <nav className="grid h-16 grid-cols-[auto_1fr_auto] items-center gap-4 lg:h-20 lg:gap-6">
+          {/* Left: Logo */}
+          <Link href="/" className="flex shrink-0 items-center gap-2.5">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-200 sm:h-10 sm:w-10 sm:rounded-2xl">
+              <DatabaseZap size={18} />
             </div>
+            <span className="text-lg font-bold tracking-tight text-slate-950 sm:text-xl">
+              Proxy<span className="text-sky-600">Market</span>
+            </span>
+          </Link>
 
-            {/* Desktop Right */}
-            <div className="hidden items-center gap-3 lg:flex">
-              <select
-                value={displayCurrency}
-                onChange={(e) => setDisplayCurrency(e.target.value as SupportedCurrency)}
-                className="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs font-medium text-gray-600 focus:outline-none focus:border-violet-400 cursor-pointer"
+          {/* Center: Navigation */}
+          <div className="hidden items-center justify-center gap-0.5 lg:flex xl:gap-1">
+            <div ref={dropdownRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setProductsOpen((open) => !open)}
+                className={`flex items-center gap-1 rounded-xl px-3 py-2 text-sm font-semibold transition xl:px-4 ${
+                  pathname.startsWith("/products") ? "bg-slate-100 text-slate-950" : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+                }`}
               >
-                {siteConfig.supportedCurrencies.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+                Products <ChevronDown size={15} className={`transition-transform ${productsOpen ? "rotate-180" : ""}`} />
+              </button>
+              <AnimatePresence>
+                {productsOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    className="absolute left-0 top-full mt-3 w-[400px] rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-200"
+                  >
+                    <div className="grid gap-1">
+                      {productNavigation.map((item) => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="rounded-xl p-3 transition hover:bg-slate-50"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-sm font-semibold text-slate-950">{item.label}</span>
+                            {item.status === "coming-soon" && (
+                              <span className="rounded-full bg-amber-50 px-2 py-1 text-[11px] font-bold text-amber-700">
+                                Soon
+                              </span>
+                            )}
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            {headerNavigation.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`rounded-xl px-3 py-2 text-sm font-semibold transition xl:px-4 ${
+                  pathname === item.href || pathname.startsWith(`${item.href}/`)
+                    ? "bg-slate-100 text-slate-950"
+                    : "text-slate-600 hover:bg-slate-50 hover:text-slate-950"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Right: Controls */}
+          <div className="flex items-center justify-end gap-1.5 xl:gap-2">
+            <div className="hidden shrink-0 items-center gap-1.5 lg:flex xl:gap-2">
+              <CurrencySwitcher compact />
+              <div className="mx-0.5 h-6 w-px bg-slate-200" />
               {isLoggedIn ? (
                 <>
-                  <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-1.5">
-                    <Wallet size={14} className="text-violet-600" />
-                    <span className="text-sm font-semibold text-gray-900">{formattedBalance}</span>
-                  </div>
-                  <Link href="/top-up">
-                    <Button size="sm" variant="outline">
-                      <Plus size={14} />
-                      Top Up
-                    </Button>
+                  <Link href="/dashboard" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-900">
+                    <Wallet size={16} className="text-sky-600" />
+                    {formattedBalance}
                   </Link>
                   <Link href="/dashboard">
-                    <Button variant="ghost" size="sm">
-                      <User size={14} />
+                    <Button size="sm" variant="outline">
+                      <User size={15} />
                       Dashboard
                     </Button>
                   </Link>
-                  <button
-                    onClick={logout}
-                    className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-                  >
-                    <LogOut size={14} />
-                    Sign Out
-                  </button>
+                  <Button size="sm" variant="ghost" onClick={logout}>
+                    <LogOut size={15} />
+                  </Button>
                 </>
               ) : (
                 <>
-                  <Link href="/sign-in">
-                    <Button variant="ghost" size="sm">Sign In</Button>
+                  <Link href="/login">
+                    <Button size="sm" variant="ghost">Login</Button>
                   </Link>
-                  <Link href="/sign-up">
-                    <Button size="sm">Sign Up</Button>
+                  <Link href="/register">
+                    <Button size="sm">Get Started</Button>
                   </Link>
                 </>
               )}
             </div>
 
             <button
-              onClick={() => setMobileOpen(!mobileOpen)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-900 transition-colors lg:hidden"
+              type="button"
+              onClick={() => setMobileOpen((open) => !open)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-700 lg:hidden"
+              aria-label="Toggle menu"
             >
-              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
-          </nav>
-        </Container>
-      </motion.header>
+          </div>
+        </nav>
+      </div>
 
       <AnimatePresence>
-        {mobileOpen && <MobileMenu onClose={() => setMobileOpen(false)} />}
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 top-16 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="relative z-50 max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-slate-200 bg-white lg:hidden"
+            >
+              <Container className="py-4">
+                <div className="grid gap-1">
+                  {[...productNavigation, ...headerNavigation].map((item) => (
+                    <Link key={item.href} href={item.href} className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                      {item.label}
+                    </Link>
+                  ))}
+                  <div className="mt-3 flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
+                    <span className="text-xs font-semibold text-slate-500">Display currency</span>
+                    <CurrencySwitcher compact />
+                  </div>
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    {isLoggedIn ? (
+                      <>
+                        <Link href="/dashboard">
+                          <Button fullWidth variant="outline">Dashboard</Button>
+                        </Link>
+                        <Button fullWidth variant="ghost" onClick={logout}>Logout</Button>
+                      </>
+                    ) : (
+                      <>
+                        <Link href="/login">
+                          <Button fullWidth variant="outline">Login</Button>
+                        </Link>
+                        <Link href="/register">
+                          <Button fullWidth>Get Started</Button>
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </Container>
+            </motion.div>
+          </>
+        )}
       </AnimatePresence>
-    </>
+    </header>
   );
 }

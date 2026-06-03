@@ -16,18 +16,18 @@ export default function NotFound() {
           transition={{ duration: 0.5 }}
           className="mx-auto max-w-lg text-center"
         >
-          <div className="text-8xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+          <div className="bg-gradient-to-r from-sky-600 to-indigo-600 bg-clip-text text-7xl font-bold text-transparent sm:text-8xl">
             404
           </div>
-          <h1 className="mt-4 text-2xl font-bold text-gray-900">Page Not Found</h1>
-          <p className="mt-3 text-gray-500">
+          <h1 className="mt-4 text-2xl font-bold text-slate-950">Page not found</h1>
+          <p className="mt-3 text-slate-600">
             The page you&apos;re looking for doesn&apos;t exist or has been moved.
           </p>
-          <div className="mt-8 flex justify-center gap-4">
+          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link href="/">
               <Button>
                 <Home size={18} />
-                Back to Home
+                Back to home
               </Button>
             </Link>
             <Link href="/dashboard">

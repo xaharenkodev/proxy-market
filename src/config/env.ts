@@ -27,12 +27,12 @@ export const env = {
     return process.env.PAYMENT_TEST_MODE === "true";
   },
   get BASE_CURRENCY() {
-    return optional("NEXT_PUBLIC_BASE_CURRENCY", "GBP") as "GBP" | "EUR" | "USD";
+    return optional("NEXT_PUBLIC_BASE_CURRENCY", "EUR") as "EUR" | "USD" | "GBP" | "UAH" | "PLN";
   },
   get COMPANY_EMAIL() {
     return optional("COMPANY_EMAIL", process.env.EMAIL_FROM || "");
   },
   get COMPANY_NAME() {
-    return optional("NEXT_PUBLIC_COMPANY_NAME", "GrowPulse");
+    return optional("NEXT_PUBLIC_COMPANY_NAME", "ProxyMarket");
   },
 };

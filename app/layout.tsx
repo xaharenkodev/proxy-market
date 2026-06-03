@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import { BalanceProvider } from "@/context/BalanceContext";
 import { AuthProvider } from "@/context/AuthContext";
-import FloatingShapes from "@/components/animations/FloatingShapes";
+import AppChrome from "@/components/layout/AppChrome";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,9 +16,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "GrowPulse — Social Media Growth Platform",
+  title: "ProxyMarket — Reliable datacenter, residential and mobile proxies",
   description:
-    "Boost your social media presence with premium likes, followers, and views for Instagram, TikTok, and YouTube.",
+    "Buy flexible EUR-priced proxies for public web data, SEO monitoring, ecommerce monitoring and geo-specific testing.",
 };
 
 export default function RootLayout({
@@ -33,10 +31,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-[#fafbfe] text-gray-900">
         <AuthProvider>
           <BalanceProvider>
-            <FloatingShapes />
-            <Header />
-            <main className="flex-1 pt-16 lg:pt-20">{children}</main>
-            <Footer />
+            <AppChrome>{children}</AppChrome>
           </BalanceProvider>
         </AuthProvider>
       </body>

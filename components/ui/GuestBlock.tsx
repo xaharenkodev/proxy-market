@@ -21,16 +21,16 @@ export default function GuestBlock({ title, description }: GuestBlockProps) {
           transition={{ duration: 0.5 }}
           className="mx-auto max-w-md text-center"
         >
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-50">
-            <Lock size={28} className="text-violet-600" />
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-sky-50">
+            <Lock size={28} className="text-sky-600" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-          <p className="mt-3 text-gray-500">{description}</p>
+          <h1 className="text-2xl font-bold text-slate-950">{title}</h1>
+          <p className="mt-3 text-slate-600">{description}</p>
           <div className="mt-8 flex justify-center gap-4">
-            <Link href="/sign-in">
-              <Button size="lg">Sign In</Button>
+            <Link href="/login">
+              <Button size="lg">Login</Button>
             </Link>
-            <Link href="/sign-up">
+            <Link href="/register">
               <Button size="lg" variant="outline">Create Account</Button>
             </Link>
           </div>

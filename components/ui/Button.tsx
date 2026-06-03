@@ -14,12 +14,12 @@ interface ButtonProps extends Omit<HTMLMotionProps<"button">, "ref"> {
 
 const variantClasses: Record<Variant, string> = {
   primary:
-    "bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:from-violet-500 hover:to-indigo-500",
+    "bg-gradient-to-r from-sky-600 to-indigo-600 text-white shadow-lg shadow-sky-500/20 hover:shadow-sky-500/30 hover:from-sky-500 hover:to-indigo-500",
   secondary:
-    "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 hover:text-gray-900",
+    "bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 hover:text-slate-950",
   outline:
-    "border border-violet-500/50 text-violet-600 hover:bg-violet-50 hover:border-violet-500",
-  ghost: "text-gray-500 hover:text-gray-900 hover:bg-gray-100",
+    "border border-sky-500/50 text-sky-700 hover:bg-sky-50 hover:border-sky-500",
+  ghost: "text-slate-600 hover:text-slate-950 hover:bg-slate-100",
 };
 
 const sizeClasses: Record<Size, string> = {

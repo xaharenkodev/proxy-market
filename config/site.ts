@@ -1,6 +1,6 @@
 export const siteConfig = {
-  name: "GrowPulse",
-  companyName: process.env.NEXT_PUBLIC_COMPANY_NAME || "GrowPulse",
+  name: "ProxyMarket",
+  companyName: process.env.NEXT_PUBLIC_COMPANY_NAME || "ProxyMarket",
   companyLegalName: process.env.NEXT_PUBLIC_COMPANY_LEGAL_NAME || "",
   companyNumber: process.env.NEXT_PUBLIC_COMPANY_NUMBER || "",
   companyVat: process.env.NEXT_PUBLIC_COMPANY_VAT || "",
@@ -8,8 +8,8 @@ export const siteConfig = {
   companyEmail: process.env.NEXT_PUBLIC_COMPANY_EMAIL || "",
   companyPhone: process.env.NEXT_PUBLIC_COMPANY_PHONE || "",
   testMode: process.env.NEXT_PUBLIC_PAYMENT_TEST_MODE === "true",
-  baseCurrency: (process.env.NEXT_PUBLIC_BASE_CURRENCY as "GBP" | "EUR" | "USD") || "GBP",
-  supportedCurrencies: ["GBP", "EUR", "USD"] as const,
+  baseCurrency: (process.env.NEXT_PUBLIC_BASE_CURRENCY as "EUR" | "USD" | "UAH") || "EUR",
+  supportedCurrencies: ["EUR", "USD", "UAH"] as const,
   frontendUrl: process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:3000",
 } as const;
 

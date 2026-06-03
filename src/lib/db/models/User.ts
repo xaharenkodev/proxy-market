@@ -23,6 +23,28 @@ export interface IOrder {
   createdAt: Date;
 }
 
+export interface IProxyRequest {
+  id: string;
+  requestKind?: "ready-package" | "custom";
+  packageName?: string;
+  proxyType: string;
+  country: string;
+  city?: string;
+  carrier?: string;
+  protocol: string;
+  rotation: string;
+  authMethod: string;
+  quantity: number;
+  bandwidthGb: number;
+  duration: string;
+  estimatedPriceEUR: number;
+  priceGBP?: number;
+  displayCurrency: string;
+  status: "paid" | "requested" | "reviewing" | "confirmed" | "completed" | "cancelled";
+  paidAt?: Date;
+  createdAt: Date;
+}
+
 export interface IUser extends Document {
   email: string;
   passwordHash: string;
@@ -39,6 +61,7 @@ export interface IUser extends Document {
   balanceGBP: number;
   transactions: ITransaction[];
   orders: IOrder[];
+  proxyRequests: IProxyRequest[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -92,6 +115,35 @@ const OrderSchema = new Schema<IOrder>(
   { _id: false }
 );
 
+const ProxyRequestSchema = new Schema<IProxyRequest>(
+  {
+    id: { type: String, required: true },
+    requestKind: { type: String, enum: ["ready-package", "custom"] },
+    packageName: { type: String },
+    proxyType: { type: String, required: true },
+    country: { type: String, required: true },
+    city: { type: String },
+    carrier: { type: String },
+    protocol: { type: String, required: true },
+    rotation: { type: String, required: true },
+    authMethod: { type: String, required: true },
+    quantity: { type: Number, required: true },
+    bandwidthGb: { type: Number, required: true },
+    duration: { type: String, required: true },
+    estimatedPriceEUR: { type: Number, required: true },
+    priceGBP: { type: Number },
+    displayCurrency: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ["paid", "requested", "reviewing", "confirmed", "completed", "cancelled"],
+      default: "requested",
+    },
+    paidAt: { type: Date },
+    createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
 const UserSchema = new Schema<IUser>(
   {
     email: {
@@ -115,14 +167,16 @@ const UserSchema = new Schema<IUser>(
     balanceGBP: { type: Number, default: 0, min: 0 },
     transactions: { type: [TransactionSchema], default: [] },
     orders: { type: [OrderSchema], default: [] },
+    proxyRequests: { type: [ProxyRequestSchema], default: [] },
   },
   { timestamps: true }
 );
 
 export function toSafeUser(user: IUser) {
   const obj = user.toObject();
-  const { passwordHash, __v, ...safe } = obj;
-  return safe;
+  delete obj.passwordHash;
+  delete obj.__v;
+  return obj;
 }
 
 const User: Model<IUser> =

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { UserPlus, Zap } from "lucide-react";
+import { UserPlus } from "lucide-react";
 import Container from "@/components/layout/Container";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import AuthVisual from "@/components/auth/AuthVisual";
 import { useAuth } from "@/context/AuthContext";
 import { countries } from "@/data/countries";
 
@@ -26,7 +26,11 @@ interface FormState {
 
 export default function SignUpPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { isLoggedIn, login } = useAuth();
+
+  useEffect(() => {
+    if (isLoggedIn) router.replace("/dashboard");
+  }, [isLoggedIn, router]);
   const [form, setForm] = useState<FormState>({
     email: "",
     password: "",
@@ -48,22 +52,10 @@ export default function SignUpPage() {
     setError("");
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const required: (keyof FormState)[] = [
-      "email",
-      "password",
-      "name",
-      "surname",
-      "phone",
-      "dob",
-      "street",
-      "city",
-      "country",
-      "postCode",
-    ];
-    const missing = required.some((f) => !form[f]);
-    if (missing) {
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const required: (keyof FormState)[] = ["email", "password", "name", "surname", "phone", "dob", "street", "city", "country", "postCode"];
+    if (required.some((field) => !form[field])) {
       setError("Please fill in all required fields.");
       return;
     }
@@ -71,10 +63,9 @@ export default function SignUpPage() {
       setError("You must agree to the Terms of Service.");
       return;
     }
-
     setLoading(true);
     try {
-      const res = await fetch("/api/user/register", {
+      const response = await fetch("/api/user/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -92,7 +83,7 @@ export default function SignUpPage() {
           },
         }),
       });
-      const data = await res.json();
+      const data = await response.json();
       if (data.success) {
         login(data.user);
         router.push("/dashboard");
@@ -107,169 +98,54 @@ export default function SignUpPage() {
   };
 
   return (
-    <section className="flex min-h-[calc(100vh-5rem)] items-center py-12">
+    <section className="bg-[linear-gradient(135deg,#f0f9ff,#fff,#eef2ff)] py-12 sm:py-16 lg:py-24">
       <Container>
-        <div className="mx-auto max-w-lg">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <div className="text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 shadow-lg shadow-violet-500/25">
-                <Zap size={24} className="text-white" />
-              </div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Create your account
-              </h1>
-              <p className="mt-2 text-sm text-gray-500">
-                Join GrowPulse and start growing today
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="mt-8">
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <div className="flex flex-col gap-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      label="First Name"
-                      placeholder="Alex"
-                      value={form.name}
-                      onChange={(e) => update("name", e.target.value)}
-                    />
-                    <Input
-                      label="Surname"
-                      placeholder="Johnson"
-                      value={form.surname}
-                      onChange={(e) => update("surname", e.target.value)}
-                    />
-                  </div>
-                  <Input
-                    label="Email"
-                    type="email"
-                    placeholder="you@example.com"
-                    value={form.email}
-                    onChange={(e) => update("email", e.target.value)}
-                  />
-                  <Input
-                    label="Password"
-                    type="password"
-                    placeholder="Create a strong password"
-                    value={form.password}
-                    onChange={(e) => update("password", e.target.value)}
-                  />
-                  <Input
-                    label="Phone Number"
-                    type="tel"
-                    placeholder="+44 7123 456789"
-                    value={form.phone}
-                    onChange={(e) => update("phone", e.target.value)}
-                  />
-                  <Input
-                    label="Date of Birth"
-                    type="date"
-                    value={form.dob}
-                    onChange={(e) => update("dob", e.target.value)}
-                  />
-
-                  <div className="border-t border-gray-100 pt-4">
-                    <p className="mb-3 text-sm font-medium text-gray-700">
-                      Address
-                    </p>
-                    <div className="flex flex-col gap-4">
-                      <Input
-                        label="Street Address"
-                        placeholder="123 Main Street"
-                        value={form.street}
-                        onChange={(e) => update("street", e.target.value)}
-                      />
-                      <div className="grid grid-cols-2 gap-4">
-                        <Input
-                          label="City"
-                          placeholder="London"
-                          value={form.city}
-                          onChange={(e) => update("city", e.target.value)}
-                        />
-                        <Input
-                          label="Post Code"
-                          placeholder="SW1A 1AA"
-                          value={form.postCode}
-                          onChange={(e) => update("postCode", e.target.value)}
-                        />
-                      </div>
-                      <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-medium text-gray-700">
-                          Country
-                        </label>
-                        <select
-                          value={form.country}
-                          onChange={(e) => update("country", e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-gray-900 transition-all duration-200 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-500/20"
-                        >
-                          <option value="">Select country</option>
-                          {countries.map((c) => (
-                            <option key={c} value={c}>
-                              {c}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={agreed}
-                      onChange={(e) => {
-                        setAgreed(e.target.checked);
-                        setError("");
-                      }}
-                      className="mt-1 h-4 w-4 rounded border-gray-300 accent-violet-600"
-                    />
-                    <span className="text-sm text-gray-500">
-                      I agree to the{" "}
-                      <Link
-                        href="/terms"
-                        className="text-violet-600 hover:text-violet-500"
-                      >
-                        Terms of Service
-                      </Link>{" "}
-                      and{" "}
-                      <Link
-                        href="/privacy"
-                        className="text-violet-600 hover:text-violet-500"
-                      >
-                        Privacy Policy
-                      </Link>
-                    </span>
-                  </label>
-
-                  {error && <p className="text-sm text-red-500">{error}</p>}
-
-                  <Button
-                    type="submit"
-                    fullWidth
-                    size="lg"
-                    disabled={loading}
-                  >
-                    <UserPlus size={18} />
-                    {loading ? "Creating Account..." : "Create Account"}
-                  </Button>
-                </div>
-              </div>
-            </form>
-
-            <p className="mt-6 text-center text-sm text-gray-500">
-              Already have an account?{" "}
-              <Link
-                href="/sign-in"
-                className="font-medium text-violet-600 hover:text-violet-500"
-              >
-                Sign In
-              </Link>
+        <div className="mx-auto grid max-w-6xl gap-6 sm:gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+          <AuthVisual />
+          <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-sky-100 sm:rounded-[2rem] sm:p-6">
+            <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Create your ProxyMarket account</h1>
+            <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-3">
+              Access balance, orders and proxy management screens.
             </p>
-          </motion.div>
+            <div className="mt-6 grid gap-3 sm:mt-8 sm:gap-4 sm:grid-cols-2">
+              <Input label="First name" value={form.name} onChange={(e) => update("name", e.target.value)} />
+              <Input label="Surname" value={form.surname} onChange={(e) => update("surname", e.target.value)} />
+              <Input className="sm:col-span-2" label="Email" type="email" value={form.email} onChange={(e) => update("email", e.target.value)} />
+              <Input label="Password" type="password" value={form.password} onChange={(e) => update("password", e.target.value)} />
+              <Input label="Phone number" type="tel" value={form.phone} onChange={(e) => update("phone", e.target.value)} />
+              <Input label="Date of birth" type="date" value={form.dob} onChange={(e) => update("dob", e.target.value)} />
+              <Input label="Street address" value={form.street} onChange={(e) => update("street", e.target.value)} />
+              <Input label="City" value={form.city} onChange={(e) => update("city", e.target.value)} />
+              <Input label="Post code" value={form.postCode} onChange={(e) => update("postCode", e.target.value)} />
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-slate-700">Country</label>
+                <select
+                  value={form.country}
+                  onChange={(e) => update("country", e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20"
+                >
+                  <option value="">Select country</option>
+                  {countries.map((country) => (
+                    <option key={country} value={country}>{country}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <label className="mt-4 flex items-start gap-3 text-sm text-slate-600 sm:mt-5">
+              <input type="checkbox" checked={agreed} onChange={(e) => { setAgreed(e.target.checked); setError(""); }} className="mt-1 h-4 w-4 rounded border-slate-300 accent-sky-600" />
+              <span>
+                I agree to the <Link href="/terms" className="font-semibold text-sky-700">Terms</Link>, <Link href="/privacy" className="font-semibold text-sky-700">Privacy Policy</Link> and acceptable-use rules.
+              </span>
+            </label>
+            {error && <p className="mt-3 text-sm text-red-600 sm:mt-4">{error}</p>}
+            <Button type="submit" fullWidth size="lg" disabled={loading} className="mt-5 sm:mt-6">
+              <UserPlus size={18} />
+              {loading ? "Creating account..." : "Create account"}
+            </Button>
+            <p className="mt-5 text-center text-sm text-slate-600 sm:mt-6">
+              Already have an account? <Link href="/login" className="font-bold text-sky-700">Login</Link>
+            </p>
+          </form>
         </div>
       </Container>
     </section>

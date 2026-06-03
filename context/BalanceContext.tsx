@@ -11,9 +11,9 @@ import {
 } from "react";
 import { SupportedCurrency } from "@/config/site";
 import { formatCurrency } from "@/config/currency";
-import { useAuth, AuthUser } from "@/context/AuthContext";
+import { useAuth, AuthUser, AuthProxyRequest } from "@/context/AuthContext";
 
-const CURRENCY_STORAGE_KEY = "growpulse_currency";
+const CURRENCY_STORAGE_KEY = "proxymarket_currency";
 
 export interface Order {
   id: string;
@@ -34,6 +34,28 @@ export interface Transaction {
   date: string;
 }
 
+export interface ProxyRequest {
+  id: string;
+  requestKind: string;
+  packageName?: string;
+  proxyType: string;
+  country: string;
+  city?: string;
+  carrier?: string;
+  protocol: string;
+  rotation: string;
+  authMethod: string;
+  quantity: number;
+  bandwidthGb: number;
+  duration: string;
+  estimatedPriceEUR: number;
+  priceGBP?: number;
+  displayCurrency: string;
+  status: string;
+  paidAt?: string;
+  date: string;
+}
+
 export interface PurchaseResult {
   status: "success" | "insufficient" | "error";
   message: string;
@@ -45,6 +67,7 @@ interface BalanceContextType {
   setDisplayCurrency: (currency: SupportedCurrency) => void;
   formattedBalance: string;
   orders: Order[];
+  proxyRequests: ProxyRequest[];
   transactions: Transaction[];
   addBalance: (amountGBP: number) => Promise<boolean>;
   purchaseService: (order: {
@@ -71,6 +94,30 @@ function mapOrders(user: AuthUser): Order[] {
   }));
 }
 
+function mapProxyRequests(user: AuthUser): ProxyRequest[] {
+  return (user.proxyRequests || []).map((r: AuthProxyRequest) => ({
+    id: r.id,
+    requestKind: r.requestKind || "custom",
+    packageName: r.packageName,
+    proxyType: r.proxyType,
+    country: r.country,
+    city: r.city,
+    carrier: r.carrier,
+    protocol: r.protocol,
+    rotation: r.rotation,
+    authMethod: r.authMethod,
+    quantity: r.quantity,
+    bandwidthGb: r.bandwidthGb,
+    duration: r.duration,
+    estimatedPriceEUR: r.estimatedPriceEUR,
+    priceGBP: r.priceGBP,
+    displayCurrency: r.displayCurrency,
+    status: r.status,
+    paidAt: r.paidAt,
+    date: r.createdAt.split("T")[0],
+  }));
+}
+
 function mapTransactions(user: AuthUser): Transaction[] {
   return user.transactions.map((t) => ({
     id: t.id,
@@ -86,15 +133,18 @@ const BalanceContext = createContext<BalanceContextType | undefined>(undefined);
 export function BalanceProvider({ children }: { children: ReactNode }) {
   const { user, updateUser, isLoggedIn } = useAuth();
   const [displayCurrency, setDisplayCurrencyState] =
-    useState<SupportedCurrency>("GBP");
+    useState<SupportedCurrency>("EUR");
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(CURRENCY_STORAGE_KEY);
-      if (stored === "GBP" || stored === "EUR" || stored === "USD") {
-        setDisplayCurrencyState(stored);
-      }
-    } catch {}
+    const timer = window.setTimeout(() => {
+      try {
+        const stored = localStorage.getItem(CURRENCY_STORAGE_KEY);
+        if (stored === "EUR" || stored === "USD" || stored === "UAH") {
+          setDisplayCurrencyState(stored);
+        }
+      } catch {}
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const setDisplayCurrency = useCallback((currency: SupportedCurrency) => {
@@ -104,6 +154,7 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
 
   const balance = user?.balanceGBP ?? 0;
   const orders = useMemo(() => (user ? mapOrders(user) : []), [user]);
+  const proxyRequests = useMemo(() => (user ? mapProxyRequests(user) : []), [user]);
   const transactions = useMemo(
     () => (user ? mapTransactions(user) : []),
     [user]
@@ -191,6 +242,7 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
         setDisplayCurrency,
         formattedBalance,
         orders,
+        proxyRequests,
         transactions,
         addBalance,
         purchaseService,

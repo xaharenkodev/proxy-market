@@ -9,6 +9,28 @@ import {
   ReactNode,
 } from "react";
 
+export interface AuthProxyRequest {
+  id: string;
+  requestKind?: "ready-package" | "custom";
+  packageName?: string;
+  proxyType: string;
+  country: string;
+  city?: string;
+  carrier?: string;
+  protocol: string;
+  rotation: string;
+  authMethod: string;
+  quantity: number;
+  bandwidthGb: number;
+  duration: string;
+  estimatedPriceEUR: number;
+  priceGBP?: number;
+  displayCurrency: string;
+  status: "paid" | "requested" | "reviewing" | "confirmed" | "completed" | "cancelled";
+  paidAt?: string;
+  createdAt: string;
+}
+
 export interface AuthUser {
   _id: string;
   email: string;
@@ -25,6 +47,7 @@ export interface AuthUser {
   balanceGBP: number;
   transactions: AuthTransaction[];
   orders: AuthOrder[];
+  proxyRequests?: AuthProxyRequest[];
   createdAt: string;
   updatedAt: string;
 }
@@ -62,22 +85,34 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = "growpulse_user";
+const STORAGE_KEY = "proxymarket_user";
+const LEGACY_KEY = "growpulse_user";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setUser(JSON.parse(stored));
+    const timer = window.setTimeout(() => {
+      try {
+        let stored = localStorage.getItem(STORAGE_KEY);
+        if (!stored) {
+          const legacy = localStorage.getItem(LEGACY_KEY);
+          if (legacy) {
+            stored = legacy;
+            localStorage.setItem(STORAGE_KEY, legacy);
+            localStorage.removeItem(LEGACY_KEY);
+          }
+        }
+        if (stored) {
+          setUser(JSON.parse(stored));
+        }
+      } catch {
+        // Corrupt storage - ignore
       }
-    } catch {
-      // Corrupt storage — ignore
-    }
-    setLoaded(true);
+      setLoaded(true);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const login = useCallback((u: AuthUser) => {
