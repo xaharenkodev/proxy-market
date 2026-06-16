@@ -2,12 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, DatabaseZap, LogOut, Menu, User, Wallet, X } from "lucide-react";
+import { ChevronDown, LogOut, Menu, User, Wallet, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Container from "./Container";
 import CurrencySwitcher from "@/components/marketing/CurrencySwitcher";
+import { siteConfig } from "@/config/site";
 import { headerNavigation, productNavigation } from "@/config/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { useBalance } from "@/context/BalanceContext";
@@ -53,13 +55,15 @@ export default function Header() {
       <div className="mx-auto w-full max-w-[1520px] px-4 sm:px-6 lg:px-10">
         <nav className="grid h-16 grid-cols-[auto_1fr_auto] items-center gap-4 lg:h-20 lg:gap-6">
           {/* Left: Logo */}
-          <Link href="/" className="flex shrink-0 items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white shadow-lg shadow-sky-200 sm:h-10 sm:w-10 sm:rounded-2xl">
-              <DatabaseZap size={18} />
-            </div>
-            <span className="text-lg font-bold tracking-tight text-slate-950 sm:text-xl">
-              Proxy<span className="text-sky-600">Market</span>
-            </span>
+          <Link href="/" className="flex shrink-0 items-center">
+            <Image
+              src="/assets/logo/logo.png"
+              alt={siteConfig.name}
+              width={994}
+              height={210}
+              priority
+              className="h-8 w-auto sm:h-9"
+            />
           </Link>
 
           {/* Center: Navigation */}

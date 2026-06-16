@@ -1,15 +1,20 @@
-import { DatabaseZap, Globe2, ShieldCheck, Wallet } from "lucide-react";
+import Image from "next/image";
+import { Globe2, ShieldCheck, Wallet } from "lucide-react";
+import { siteConfig } from "@/config/site";
 
 export default function AuthVisual() {
   return (
     <div className="hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl shadow-sky-100 sm:rounded-[2rem] sm:p-6 lg:block">
       <div className="rounded-2xl bg-[linear-gradient(135deg,#e0f2fe,#fff,#eef2ff)] p-5 sm:rounded-3xl sm:p-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-600 text-white sm:h-12 sm:w-12 sm:rounded-2xl">
-            <DatabaseZap size={20} />
-          </div>
+          <Image
+            src="/assets/logo/logo.png"
+            alt={siteConfig.name}
+            width={994}
+            height={210}
+            className="h-8 w-auto"
+          />
           <div>
-            <p className="text-sm font-bold text-slate-950">ProxyMarket</p>
             <p className="text-xs text-slate-500">Dashboard access</p>
           </div>
         </div>

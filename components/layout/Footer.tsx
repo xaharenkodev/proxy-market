@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DatabaseZap } from "lucide-react";
+import Image from "next/image";
 import Container from "./Container";
 import { footerColumns, complianceNote } from "@/config/footer";
 import { siteConfig } from "@/config/site";
@@ -10,13 +10,14 @@ export default function Footer() {
       <Container className="py-12 lg:py-16">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-6">
           <div className="sm:col-span-2">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-indigo-600 text-white sm:h-10 sm:w-10 sm:rounded-2xl">
-                <DatabaseZap size={18} />
-              </div>
-              <span className="text-lg font-bold text-slate-950 sm:text-xl">
-                Proxy<span className="text-sky-600">Market</span>
-              </span>
+            <Link href="/" className="flex items-center">
+              <Image
+                src="/assets/logo/logo.png"
+                alt={siteConfig.name}
+                width={994}
+                height={210}
+                className="h-9 w-auto"
+              />
             </Link>
             <p className="mt-5 max-w-sm text-sm leading-6 text-slate-600">
               Reliable datacenter, ISP, residential and mobile proxy workflows for public data, monitoring and geo-specific testing.

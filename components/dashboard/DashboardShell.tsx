@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { DatabaseZap, LogOut, Menu, X } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 import { dashboardNavigation } from "@/config/navigation";
+import { siteConfig } from "@/config/site";
 import { useAuth } from "@/context/AuthContext";
 import { useBalance } from "@/context/BalanceContext";
 import GuestBlock from "@/components/ui/GuestBlock";
@@ -51,11 +53,14 @@ export default function DashboardShell({ children }: { children: React.ReactNode
 
       <aside className={`fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-slate-200 bg-white transition-transform lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between p-4">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-600 text-white">
-              <DatabaseZap size={18} />
-            </div>
-            <span className="text-lg font-bold text-slate-950">ProxyMarket</span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/assets/logo/logo.png"
+              alt={siteConfig.name}
+              width={994}
+              height={210}
+              className="h-8 w-auto"
+            />
           </Link>
           <button type="button" onClick={() => setOpen(false)} className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 lg:hidden">
             <X size={20} />
