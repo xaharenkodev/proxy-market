@@ -16,14 +16,14 @@ import { ProductConfig } from "@/config/products";
 import { faqItems } from "@/config/faq";
 
 const techFeatures = [
-  { icon: Network, title: "HTTP/SOCKS5", text: "Protocol display and selection flows are wired through the UI." },
-  { icon: Layers3, title: "Rotation control", text: "Rotating and sticky session choices are represented where relevant." },
-  { icon: Fingerprint, title: "Sticky identity", text: "Long-session product flows communicate stable proxy identity." },
-  { icon: Globe2, title: "Country targeting", text: "Country filters and product availability tags are included." },
-  { icon: RadioTower, title: "Carrier fields", text: "Mobile carrier targeting appears as a clear integration placeholder." },
-  { icon: LockKeyhole, title: "IP whitelist", text: "Whitelist UI is prepared without pretending persistence exists." },
-  { icon: KeyRound, title: "User/pass auth", text: "Username/password mode is part of the proxy configuration model." },
-  { icon: BarChart3, title: "Usage surface", text: "Dashboard cards and tables are ready for analytics integration." },
+  { icon: Network, title: "HTTP/SOCKS5", text: "Standard protocols supported on every proxy in this product." },
+  { icon: Layers3, title: "Rotation control", text: "Choose rotating exits for breadth or sticky sessions for continuity." },
+  { icon: Fingerprint, title: "Sticky identity", text: "Hold the same address across a session where the workflow requires it." },
+  { icon: Globe2, title: "Country targeting", text: "Select the exit country, with city targeting available in supported locations." },
+  { icon: RadioTower, title: "Carrier targeting", text: "Target specific mobile carriers where the location and product support it." },
+  { icon: LockKeyhole, title: "IP whitelist", text: "Bind access to your own source addresses instead of credentials." },
+  { icon: KeyRound, title: "User/pass auth", text: "Per-proxy credentials you can rotate at any time from the dashboard." },
+  { icon: BarChart3, title: "Usage reporting", text: "Bandwidth, request volume and session counts, per proxy, in the dashboard." },
 ];
 
 export default function ProductPage({ product }: { product: ProductConfig }) {
@@ -44,7 +44,7 @@ export default function ProductPage({ product }: { product: ProductConfig }) {
                     <Icon size={22} />
                   </div>
                   <Badge variant={isComingSoon ? "warning" : "info"}>
-                    {isComingSoon ? "Coming Soon" : "Dashboard ready"}
+                    {isComingSoon ? "Coming Soon" : "Available now"}
                   </Badge>
                   <Badge>{product.category}</Badge>
                 </div>

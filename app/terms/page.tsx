@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import LegalPage from "@/components/legal/LegalPage";
-import { legalPages } from "@/config/legal";
+import { terms } from "@/config/legal";
+
+export const metadata: Metadata = {
+  title: "Terms & Conditions",
+};
 
 export default function TermsPage() {
-  return <LegalPage page={legalPages.terms} />;
+  return <LegalPage doc={terms} />;
 }

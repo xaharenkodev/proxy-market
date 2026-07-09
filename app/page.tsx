@@ -18,28 +18,28 @@ import { homepageFaq } from "@/config/faq";
 
 const stats = [
   { value: "50+", label: "Locations", note: "Region filters included" },
-  { value: "4", label: "Proxy types", note: "Plus API roadmap" },
+  { value: "4", label: "Proxy types", note: "Datacenter, ISP, residential, mobile" },
   { value: "2", label: "Protocols", note: "HTTP & SOCKS5" },
   { value: "5", label: "Currencies", note: "EUR default" },
 ];
 
 const steps = [
-  ["01", "Create account", "Use the existing auth flow with a new proxy-focused onboarding experience."],
+  ["01", "Create account", "Sign up in under a minute and land straight in the proxy configurator."],
   ["02", "Choose network type", "Pick datacenter, static ISP, residential or mobile based on the workflow."],
-  ["03", "Tune targeting", "Select country, optional city, carrier placeholder, protocol and auth method."],
-  ["04", "Review pricing", "Preview converted planning prices in EUR, USD, GBP, UAH or PLN."],
-  ["05", "Connect provisioning", "The frontend is prepared for backend integration in the next phase."],
+  ["03", "Tune targeting", "Select country, optional city or carrier, protocol and authentication method."],
+  ["04", "Review pricing", "See the exact price before you confirm, in EUR, USD, GBP, UAH or PLN."],
+  ["05", "Start routing traffic", "Receive your credentials and point your tooling at the endpoint."],
 ];
 
 const features = [
-  { icon: Network, title: "HTTP/SOCKS5 support", text: "Protocol selection flows are ready across product and buy pages." },
-  { icon: Layers3, title: "Rotating sessions", text: "Residential and datacenter flows include rotation controls for public data workflows." },
-  { icon: Fingerprint, title: "Sticky sessions", text: "Static and residential use cases present stable session behavior." },
-  { icon: LockKeyhole, title: "IP whitelist", text: "Whitelist screens are polished placeholders until persistence endpoints are added." },
-  { icon: KeyRound, title: "Username/password auth", text: "Auth method selection is built into the configurator and proxy detail layouts." },
-  { icon: Globe2, title: "Country targeting", text: "Locations use region filters, country chips and product availability tags." },
-  { icon: BarChart3, title: "Usage analytics", text: "Traffic cards and chart-style dashboard previews create the reporting surface." },
-  { icon: Wallet, title: "Balance management", text: "Existing wallet state is preserved while pricing gets modern currency conversion." },
+  { icon: Network, title: "HTTP/SOCKS5 support", text: "Standard protocols that drop into any HTTP client, crawler or headless browser." },
+  { icon: Layers3, title: "Rotating sessions", text: "Get a fresh exit IP per request to spread wide crawls across the pool." },
+  { icon: Fingerprint, title: "Sticky sessions", text: "Hold one address across a multi-step flow when a target depends on continuity." },
+  { icon: LockKeyhole, title: "IP whitelist", text: "Authenticate by source address instead of credentials where your infrastructure is fixed." },
+  { icon: KeyRound, title: "Username/password auth", text: "Rotate credentials from the dashboard without redeploying your tooling." },
+  { icon: Globe2, title: "Country targeting", text: "Choose the exit country so region-gated content resolves as a local visitor sees it." },
+  { icon: BarChart3, title: "Usage analytics", text: "Track bandwidth, requests and active sessions before a runaway job becomes an invoice." },
+  { icon: Wallet, title: "Balance management", text: "Top up a wallet and pay for orders from your balance, in your display currency." },
 ];
 
 export default function Home() {
@@ -102,11 +102,11 @@ export default function Home() {
                 <SectionHeader
                   align="left"
                   eyebrow="Workflow"
-                  title="A premium configuration journey"
-                  description="The buying experience is represented as a product-quality flow while real delivery remains reserved for backend integration."
+                  title="From signup to first request"
+                  description="Configure the network type, targeting and protocol you need, then route your traffic through it."
                 />
                 <div className="mt-6 rounded-2xl border border-sky-100 bg-sky-50/80 p-4 text-sm leading-6 text-sky-950 sm:rounded-3xl sm:p-5">
-                  Provisioning flow is prepared on the frontend. Backend integration can be connected in the next phase.
+                  Custom proxy setups are reviewed by our team before activation. Most orders are provisioned within a few minutes to a few hours.
                 </div>
               </div>
             </Reveal>

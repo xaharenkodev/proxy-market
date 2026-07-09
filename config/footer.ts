@@ -1,3 +1,5 @@
+import { legalIndex } from "./legal";
+
 export const footerColumns = [
   {
     title: "Products",
@@ -30,14 +32,9 @@ export const footerColumns = [
   },
   {
     title: "Legal",
-    links: [
-      { href: "/terms", label: "Terms of Service" },
-      { href: "/privacy", label: "Privacy Policy" },
-      { href: "/acceptable-use-policy", label: "Acceptable Use Policy" },
-      { href: "/refund-policy", label: "Refund Policy" },
-    ],
+    links: legalIndex.map((doc) => ({ href: doc.href, label: doc.label })),
   },
 ];
 
 export const complianceNote =
-  "ProxyMarket services are intended for lawful business workflows, public data access, testing and monitoring. Abuse, unauthorized access and illegal activity are prohibited.";
+  "Virenza Proxy services are intended for lawful business workflows, public data access, testing and monitoring. Abuse, unauthorised access and illegal activity are prohibited.";

@@ -52,7 +52,7 @@ export default function ContactPage() {
         <Container>
           <SectionHeader
             eyebrow="Contact"
-            title="Talk to ProxyMarket support"
+            title="Talk to Virenza Proxy support"
             description="Ask about proxy workflows, billing, compliance, or upcoming API products."
           />
         </Container>

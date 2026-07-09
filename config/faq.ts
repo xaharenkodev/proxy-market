@@ -9,55 +9,67 @@ export const faqItems: FAQItem[] = [
     category: "Products",
     question: "What proxy types do you offer?",
     answer:
-      "The frontend presents datacenter, static residential/ISP, residential and mobile proxies. SERP and eCommerce scraping APIs are marked as coming soon.",
+      "Datacenter, static residential (ISP), residential and mobile proxies. SERP and eCommerce scraping APIs are on the roadmap and marked as coming soon.",
   },
   {
     category: "Products",
     question: "What is the difference between datacenter and residential proxies?",
     answer:
-      "Datacenter proxies prioritize speed and cost efficiency. Residential proxies provide broader network diversity for public data workflows and regional research.",
+      "Datacenter proxies run on hosting infrastructure: fast, cheap and ideal for high-throughput work against targets that do not scrutinise network origin. Residential proxies use addresses associated with consumer internet connections, which most websites treat as ordinary traffic. Start with datacenter and move a target to residential only if it blocks you.",
   },
   {
     category: "Products",
     question: "Do you support HTTP and SOCKS5?",
     answer:
-      "The product UI supports HTTP and SOCKS5 selections. Actual provisioning is not connected in this frontend phase.",
+      "Yes. Every proxy supports HTTP, HTTPS and SOCKS5, with authentication by username and password or by IP whitelist.",
   },
   {
     category: "Products",
     question: "Can I choose a country?",
     answer:
-      "Yes, the buying UI supports country selection and shows city/carrier placeholders where relevant.",
+      "Yes. Country targeting is available across our supported locations, with city and carrier targeting where the product and location support it. Geolocation is derived from third-party databases and is best-effort below country level.",
   },
   {
     category: "Billing",
     question: "How does billing work?",
     answer:
-      "The interface uses EUR pricing. The existing backend balance/top-up flow is preserved and proxy provisioning remains pending until backend support is connected.",
+      "You top up a wallet balance and orders are paid from it. Prices are quoted in EUR and can be displayed in USD, GBP, UAH or PLN. The final amount payable, including any applicable taxes, is shown before you confirm.",
+  },
+  {
+    category: "Billing",
+    question: "Can I get a refund?",
+    answer:
+      "Proxy access is a digital service, so refund rights are limited once credentials are issued, access is activated or traffic is consumed. Duplicate payments, billing errors and orders that were never activated are refundable. See the Refund & Cancellation Policy for the full position.",
   },
   {
     category: "Dashboard",
     question: "Do you offer rotating sessions?",
     answer:
-      "The UI supports rotating and sticky session choices. Real rotation controls require future provisioning integration.",
+      "Yes. Rotating exits give you a fresh IP per request, and sticky sessions hold one address across a multi-step flow. Session duration and stability depend on the product and the underlying network.",
   },
   {
     category: "Compliance",
     question: "What activities are prohibited?",
     answer:
-      "Spam, phishing, brute force, credential stuffing, carding, malware, unauthorized access, illegal activity and attacks against third-party systems are prohibited.",
+      "Spam, phishing, credential stuffing, brute force, carding and payment fraud, malware distribution, unauthorised access, denial-of-service traffic, mass account creation, platform manipulation, sanctions evasion and any unlawful activity. The Acceptable Use Policy sets this out in full.",
+  },
+  {
+    category: "Compliance",
+    question: "Will a proxy guarantee access to a specific website?",
+    answer:
+      "No. Third-party websites may block, rate-limit, challenge or blacklist proxy traffic at any time based on signals we do not control. We do not guarantee that any proxy, IP, location or protocol will work with a particular platform.",
   },
   {
     category: "Products",
     question: "Are scraping APIs available?",
     answer:
-      "SERP Scraping API and eCommerce Scraping API pages are included as coming soon with waitlist/contact CTAs only.",
+      "Not yet. The SERP Scraping API and eCommerce Scraping API are in development. Until they ship, run your own collection through our proxies — contact us to join the waitlist.",
   },
   {
     category: "Dashboard",
-    question: "Will the dashboard show real credentials?",
+    question: "How quickly is an order activated?",
     answer:
-      "Not in this phase. Credential and whitelist screens are clearly marked as UI placeholders until backend provisioning is connected.",
+      "Standard dashboard products are usually available within a few minutes of successful payment. Orders needing manual configuration typically take up to one business day, and custom or high-volume orders one to five business days. Orders subject to fraud, sanctions or compliance review are delayed until the review completes.",
   },
 ];
 

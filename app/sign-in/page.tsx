@@ -55,7 +55,7 @@ export default function SignInPage() {
         <div className="mx-auto grid max-w-5xl gap-6 sm:gap-8 lg:grid-cols-2">
           <AuthVisual />
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-sky-100 sm:rounded-[2rem] sm:p-6">
-            <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Login to ProxyMarket</h1>
+            <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Login to Virenza Proxy</h1>
             <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-3">
               Access your balance, proxy configuration, order history and support tools.
             </p>
@@ -69,7 +69,7 @@ export default function SignInPage() {
               </Button>
             </form>
             <p className="mt-5 text-center text-sm text-slate-600 sm:mt-6">
-              New to ProxyMarket?{" "}
+              New to Virenza Proxy?{" "}
               <Link href="/register" className="font-bold text-sky-700">Create account</Link>
             </p>
           </div>

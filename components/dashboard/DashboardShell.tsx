@@ -35,7 +35,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
     return (
       <GuestBlock
         title="Login to view your dashboard"
-        description="You need an account to access ProxyMarket dashboard tools."
+        description="You need an account to access Virenza Proxy dashboard tools."
       />
     );
   }
@@ -104,7 +104,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
               <Menu size={20} />
             </button>
             <div className="hidden min-w-0 lg:block">
-              <p className="truncate text-sm text-slate-500">Provisioning flow is prepared on the frontend. Backend integration can be connected in the next phase.</p>
+              <p className="truncate text-sm text-slate-500">Configure proxies, manage your balance and track usage across your orders.</p>
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <div className="hidden text-right sm:block">

@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import LegalPage from "@/components/legal/LegalPage";
-import { legalPages } from "@/config/legal";
+import { refundPolicy } from "@/config/legal";
+
+export const metadata: Metadata = {
+  title: "Refund & Cancellation Policy",
+};
 
 export default function RefundPolicyPage() {
-  return <LegalPage page={legalPages.refund} />;
+  return <LegalPage doc={refundPolicy} />;
 }

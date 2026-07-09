@@ -33,6 +33,6 @@ export const env = {
     return optional("COMPANY_EMAIL", process.env.EMAIL_FROM || "");
   },
   get COMPANY_NAME() {
-    return optional("NEXT_PUBLIC_COMPANY_NAME", "ProxyMarket");
+    return optional("NEXT_PUBLIC_COMPANY_NAME", "Virenza Proxy");
   },
 };

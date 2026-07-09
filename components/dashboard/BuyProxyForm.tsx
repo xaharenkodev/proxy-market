@@ -8,6 +8,7 @@ import Badge from "@/components/ui/Badge";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import CurrencySwitcher from "@/components/marketing/CurrencySwitcher";
+import CheckoutLegal from "@/components/legal/CheckoutLegal";
 import { availableProducts } from "@/config/products";
 import { locations, getCitiesForCountry, getCarriersForCountry, getLocationByCountry } from "@/config/locations";
 import { packageTemplates } from "@/config/packages";
@@ -396,6 +397,8 @@ export default function BuyProxyForm() {
           </aside>
         </div>
       )}
+
+      <CheckoutLegal />
     </div>
   );
 }

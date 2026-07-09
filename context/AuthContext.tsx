@@ -85,8 +85,8 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const STORAGE_KEY = "proxymarket_user";
-const LEGACY_KEY = "growpulse_user";
+const STORAGE_KEY = "virenza_user";
+const LEGACY_KEYS = ["proxymarket_user", "growpulse_user"];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
@@ -96,14 +96,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const timer = window.setTimeout(() => {
       try {
         let stored = localStorage.getItem(STORAGE_KEY);
-        if (!stored) {
-          const legacy = localStorage.getItem(LEGACY_KEY);
+        for (const legacyKey of LEGACY_KEYS) {
+          const legacy = localStorage.getItem(legacyKey);
           if (legacy) {
-            stored = legacy;
-            localStorage.setItem(STORAGE_KEY, legacy);
-            localStorage.removeItem(LEGACY_KEY);
+            stored ??= legacy;
+            localStorage.removeItem(legacyKey);
           }
         }
+        if (stored) localStorage.setItem(STORAGE_KEY, stored);
         if (stored) {
           setUser(JSON.parse(stored));
         }

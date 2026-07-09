@@ -4,6 +4,7 @@ import "./globals.css";
 import { BalanceProvider } from "@/context/BalanceContext";
 import { AuthProvider } from "@/context/AuthContext";
 import AppChrome from "@/components/layout/AppChrome";
+import { siteConfig } from "@/config/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,9 +17,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ProxyMarket — Reliable datacenter, residential and mobile proxies",
+  metadataBase: new URL(siteConfig.frontendUrl),
+  title: {
+    default: "Virenza Proxy — Datacenter, ISP, residential and mobile proxies",
+    template: "%s — Virenza Proxy",
+  },
   description:
-    "Buy flexible EUR-priced proxies for public web data, SEO monitoring, ecommerce monitoring and geo-specific testing.",
+    "Datacenter, static ISP, residential and mobile proxies for public web data collection, SEO monitoring, ecommerce monitoring, ad verification and geo-specific testing.",
+  applicationName: siteConfig.name,
+  openGraph: {
+    type: "website",
+    siteName: siteConfig.name,
+    url: siteConfig.frontendUrl,
+    title: "Virenza Proxy — Datacenter, ISP, residential and mobile proxies",
+    description:
+      "Proxy infrastructure for public web data collection, monitoring, QA and research workflows.",
+  },
 };
 
 export default function RootLayout({

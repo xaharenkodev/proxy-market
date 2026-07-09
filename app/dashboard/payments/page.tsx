@@ -14,7 +14,7 @@ export default function DashboardPaymentsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Payments / invoices</h1>
-        <p className="mt-1.5 text-sm text-slate-600 sm:mt-2">Payment history and invoice records. Full invoices will be available once payment backend is integrated.</p>
+        <p className="mt-1.5 text-sm text-slate-600 sm:mt-2">Your payment history. Invoices and receipts are issued to the billing details on your account.</p>
       </div>
       {topUps.length ? (
         <TableShell>
@@ -33,8 +33,8 @@ export default function DashboardPaymentsPage() {
                 <Td>{payment.id}</Td>
                 <Td><Badge variant="success">Completed</Badge></Td>
                 <Td>{formatCurrency(payment.amount, displayCurrency)}</Td>
-                <Td>Top-up flow</Td>
-                <Td><span className="text-xs text-slate-400">Coming soon</span></Td>
+                <Td>Wallet top-up</Td>
+                <Td><span className="text-xs text-slate-400">On request</span></Td>
               </tr>
             ))}
           </tbody>
@@ -42,7 +42,7 @@ export default function DashboardPaymentsPage() {
       ) : (
         <EmptyState
           title="No payment records"
-          description="Top-up transactions will appear here. Full invoices will be available after payment backend integration."
+          description="Payments and wallet top-ups appear here once you add funds to your balance."
           ctaHref="/dashboard/balance"
           ctaLabel="Add balance"
         />

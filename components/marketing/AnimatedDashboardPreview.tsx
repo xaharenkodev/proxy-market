@@ -244,7 +244,7 @@ export default function AnimatedDashboardPreview() {
               <DatabaseZap size={18} />
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold">ProxyMarket</p>
+              <p className="truncate text-sm font-bold">Virenza Proxy</p>
               <p className="text-xs text-slate-400">Operations</p>
             </div>
           </div>

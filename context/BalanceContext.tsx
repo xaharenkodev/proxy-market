@@ -13,7 +13,8 @@ import { SupportedCurrency } from "@/config/site";
 import { formatCurrency } from "@/config/currency";
 import { useAuth, AuthUser, AuthProxyRequest } from "@/context/AuthContext";
 
-const CURRENCY_STORAGE_KEY = "proxymarket_currency";
+const CURRENCY_STORAGE_KEY = "virenza_currency";
+const LEGACY_CURRENCY_STORAGE_KEY = "proxymarket_currency";
 
 export interface Order {
   id: string;
@@ -138,7 +139,8 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       try {
-        const stored = localStorage.getItem(CURRENCY_STORAGE_KEY);
+        const stored =
+          localStorage.getItem(CURRENCY_STORAGE_KEY) ?? localStorage.getItem(LEGACY_CURRENCY_STORAGE_KEY);
         if (stored === "EUR" || stored === "USD" || stored === "UAH") {
           setDisplayCurrencyState(stored);
         }

@@ -114,12 +114,12 @@ export const products: ProductConfig[] = [
     description:
       "High-trust 4G/5G mobile proxy workflows for mobile testing, ad verification and regional QA.",
     longDescription:
-      "Mobile proxies are designed for mobile network contexts where carrier and region matter. Carrier targeting and rotation controls are represented as frontend placeholders until provisioning is connected.",
+      "Mobile proxies route traffic through IP addresses associated with mobile carrier networks, which is the context mobile-targeted content and advertising is actually served in. Carrier and region targeting is available where the location supports it.",
     startingPriceLabel: "from €5.99/day or €6.49/GB",
     pricing: ["€5.99/day", "€6.49/GB"],
-    features: ["4G/5G positioning", "Carrier targeting placeholder", "Manual/API rotation UI", "Daily and GB-based pricing", "High trust score"],
+    features: ["4G/5G networks", "Carrier targeting", "Manual and API rotation", "Daily and GB-based pricing", "High trust score"],
     protocols: ["HTTP", "SOCKS5"],
-    rotationSupport: "Manual/API rotation placeholder",
+    rotationSupport: "Manual and API rotation",
     authMethods: ["Username/password", "IP whitelist"],
     bestFor: ["Mobile QA", "Ad verification", "Geo-specific mobile workflows"],
     useCases: ["Ad verification", "Geo-specific testing", "Market research"],

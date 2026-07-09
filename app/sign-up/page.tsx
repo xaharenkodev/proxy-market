@@ -103,7 +103,7 @@ export default function SignUpPage() {
         <div className="mx-auto grid max-w-6xl gap-6 sm:gap-8 lg:grid-cols-[0.8fr_1.2fr]">
           <AuthVisual />
           <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-sky-100 sm:rounded-[2rem] sm:p-6">
-            <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Create your ProxyMarket account</h1>
+            <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Create your Virenza Proxy account</h1>
             <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-3">
               Access balance, orders and proxy management screens.
             </p>

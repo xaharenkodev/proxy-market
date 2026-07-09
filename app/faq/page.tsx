@@ -12,7 +12,7 @@ export default function FAQPage() {
         <Container>
           <SectionHeader
             eyebrow="FAQ"
-            title="ProxyMarket questions"
+            title="Virenza Proxy questions"
             description="Answers about product types, billing, dashboard features and acceptable use."
           />
         </Container>

@@ -6,6 +6,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Badge from "@/components/ui/Badge";
 import { TableShell, Td, Th } from "@/components/ui/Table";
+import CheckoutLegal from "@/components/legal/CheckoutLegal";
 import { useBalance } from "@/context/BalanceContext";
 import { convertToGBP, formatCurrency } from "@/config/currency";
 import { siteConfig } from "@/config/site";
@@ -34,7 +35,7 @@ export default function DashboardBalancePage() {
     if (ok) {
       setMessage(`Added €${parsed.toFixed(2)} equivalent to your wallet.`);
     } else {
-      setError("Top-up failed. Payment provider may be disabled outside test mode.");
+      setError("Top-up could not be completed. Please try again or contact support.");
     }
     setLoading(false);
   };
@@ -43,12 +44,14 @@ export default function DashboardBalancePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Balance / top up</h1>
-        <p className="mt-1.5 text-sm text-slate-600 sm:mt-2">Uses the existing balance/top-up logic. EUR is the visible frontend currency.</p>
+        <p className="mt-1.5 text-sm text-slate-600 sm:mt-2">
+          Add funds to your wallet and pay for proxy orders from your balance. Prices are quoted in EUR.
+        </p>
       </div>
       {isTestMode && (
         <div className="rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm text-sky-950 sm:rounded-[1.5rem]">
           <Info className="mr-2 inline h-4 w-4" />
-          Test mode is enabled. The existing wallet top-up flow is preserved without adding payment provider logic.
+          Test mode is enabled on this environment. Top-ups are simulated and no card is charged.
         </div>
       )}
       <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
@@ -102,6 +105,7 @@ export default function DashboardBalancePage() {
           </TableShell>
         </div>
       </div>
+      <CheckoutLegal />
     </div>
   );
 }
