@@ -505,55 +505,6 @@ export const refundPolicy: LegalDoc = {
       ],
     },
     {
-      title: "Subscriptions and Renewals",
-      blocks: [
-        {
-          type: "p",
-          text: "Some Services may be sold as subscriptions or recurring plans.",
-        },
-        {
-          type: "p",
-          text: "Where recurring billing applies, the subscription renews automatically unless you cancel before the renewal date.",
-        },
-        {
-          type: "p",
-          text: "You are responsible for cancelling unwanted renewals in time.",
-        },
-        {
-          type: "p",
-          text: "You may cancel a subscription:",
-        },
-        {
-          type: "list",
-          items: [
-            "through the dashboard, where cancellation functionality is available; or",
-            "by contacting us at info@virenzaproxy.com",
-          ],
-        },
-        {
-          type: "p",
-          text: "Cancellation stops future renewals. It does not automatically refund:",
-        },
-        {
-          type: "list",
-          items: [
-            "previous payments",
-            "the current billing period",
-            "used traffic",
-            "activated access",
-            "issued credentials",
-            "custom configuration",
-            "one-time orders",
-            "services suspended for policy violations",
-          ],
-        },
-        {
-          type: "p",
-          text: "If you cancel during an active paid period, access may continue until the end of that period unless the account is terminated for breach or the product rules state otherwise.",
-        },
-      ],
-    },
-    {
       title: "One-Time Orders",
       blocks: [
         {
