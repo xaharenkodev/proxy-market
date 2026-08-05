@@ -1,5 +1,51 @@
 [
   {
+    "id": "log-1785925294443-214",
+    "timestamp": "2026-08-05T10:21:34.443Z",
+    "type": "request",
+    "data": {
+      "endpoint": "https://uiservices.ezzygate.com/hosted/",
+      "merchantID": "2203441",
+      "trans_amount": "100",
+      "trans_currency": "EUR",
+      "trans_type": "0",
+      "trans_installments": "1",
+      "client_email": "mihails.horolskis@gmail.com",
+      "client_fullName": "Mihails Horolskis",
+      "valuesString": "2203441100EUR2RN9TLWP52",
+      "base64Signature": "KUF7NyYU6N3J2Fj9Lxg7OoQwUQWZ4df8lIK9F8o/w5s=",
+      "urlEncodedSignature": "KUF7NyYU6N3J2Fj9Lxg7OoQwUQWZ4df8lIK9F8o%2Fw5s%3D",
+      "url_redirect": "http://localhost:3000/payment/return",
+      "url_notify": "http://localhost:3000/api/payments/ezzygate/webhook",
+      "paymentUrl": "https://uiservices.ezzygate.com/hosted/?merchantID=2203441&trans_amount=100&trans_currency=EUR&trans_type=0&trans_installments=1&client_email=mihails.horolskis%40gmail.com&client_AutoRegistration=0&signature=KUF7NyYU6N3J2Fj9Lxg7OoQwUQWZ4df8lIK9F8o%2Fw5s%3D&client_fullName=Mihails%20Horolskis&url_redirect=http%3A%2F%2Flocalhost%3A3000%2Fpayment%2Freturn&url_notify=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fpayments%2Fezzygate%2Fwebhook",
+      "curlCommand": "curl -X GET \"https://uiservices.ezzygate.com/hosted/?merchantID=2203441&trans_amount=100&trans_currency=EUR&trans_type=0&trans_installments=1&client_email=mihails.horolskis%40gmail.com&client_AutoRegistration=0&signature=KUF7NyYU6N3J2Fj9Lxg7OoQwUQWZ4df8lIK9F8o%2Fw5s%3D&client_fullName=Mihails%20Horolskis&url_redirect=http%3A%2F%2Flocalhost%3A3000%2Fpayment%2Freturn&url_notify=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fpayments%2Fezzygate%2Fwebhook\"",
+      "curlCommandPost": "curl -X POST \"https://uiservices.ezzygate.com/hosted/\" \\\n  -H \"content-type: application/x-www-form-urlencoded\" \\\n  -d \"merchantID=2203441&trans_amount=100&trans_currency=EUR&trans_type=0&trans_installments=1&client_email=mihails.horolskis%40gmail.com&signature=KUF7NyYU6N3J2Fj9Lxg7OoQwUQWZ4df8lIK9F8o%2Fw5s%3D&url_redirect=http%3A%2F%2Flocalhost%3A3000%2Fpayment%2Freturn&url_notify=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fpayments%2Fezzygate%2Fwebhook\""
+    }
+  },
+  {
+    "id": "log-1785925246411-284",
+    "timestamp": "2026-08-05T10:20:46.411Z",
+    "type": "request",
+    "data": {
+      "endpoint": "https://uiservices.ezzygate.com/hosted/",
+      "merchantID": "2203441",
+      "trans_amount": "1.85",
+      "trans_currency": "EUR",
+      "trans_type": "0",
+      "trans_installments": "1",
+      "client_email": "mihails.horolskis@gmail.com",
+      "client_fullName": "Mihails Horolskis",
+      "valuesString": "22034411.85EUR2RN9TLWP52",
+      "base64Signature": "oqGHtjmcLSOkmTdz9Cs7a5MMjasUUOMwS7XTAR5er0Y=",
+      "urlEncodedSignature": "oqGHtjmcLSOkmTdz9Cs7a5MMjasUUOMwS7XTAR5er0Y%3D",
+      "url_redirect": "http://localhost:3000/payment/return",
+      "url_notify": "http://localhost:3000/api/payments/ezzygate/webhook",
+      "paymentUrl": "https://uiservices.ezzygate.com/hosted/?merchantID=2203441&trans_amount=1.85&trans_currency=EUR&trans_type=0&trans_installments=1&client_email=mihails.horolskis%40gmail.com&client_AutoRegistration=0&signature=oqGHtjmcLSOkmTdz9Cs7a5MMjasUUOMwS7XTAR5er0Y%3D&client_fullName=Mihails%20Horolskis&url_redirect=http%3A%2F%2Flocalhost%3A3000%2Fpayment%2Freturn&url_notify=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fpayments%2Fezzygate%2Fwebhook",
+      "curlCommand": "curl -X GET \"https://uiservices.ezzygate.com/hosted/?merchantID=2203441&trans_amount=1.85&trans_currency=EUR&trans_type=0&trans_installments=1&client_email=mihails.horolskis%40gmail.com&client_AutoRegistration=0&signature=oqGHtjmcLSOkmTdz9Cs7a5MMjasUUOMwS7XTAR5er0Y%3D&client_fullName=Mihails%20Horolskis&url_redirect=http%3A%2F%2Flocalhost%3A3000%2Fpayment%2Freturn&url_notify=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fpayments%2Fezzygate%2Fwebhook\"",
+      "curlCommandPost": "curl -X POST \"https://uiservices.ezzygate.com/hosted/\" \\\n  -H \"content-type: application/x-www-form-urlencoded\" \\\n  -d \"merchantID=2203441&trans_amount=1.85&trans_currency=EUR&trans_type=0&trans_installments=1&client_email=mihails.horolskis%40gmail.com&signature=oqGHtjmcLSOkmTdz9Cs7a5MMjasUUOMwS7XTAR5er0Y%3D&url_redirect=http%3A%2F%2Flocalhost%3A3000%2Fpayment%2Freturn&url_notify=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fpayments%2Fezzygate%2Fwebhook\""
+    }
+  },
+  {
     "id": "log-1785915895796-753",
     "timestamp": "2026-08-05T07:44:55.796Z",
     "type": "request",
