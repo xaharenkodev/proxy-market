@@ -6,19 +6,17 @@ import Link from "next/link";
 import { CheckCircle2, Clock, XCircle, ArrowRight, ShieldCheck } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { useBalance } from "@/context/BalanceContext";
-import { useAuth } from "@/context/AuthContext";
 import { convertToGBP } from "@/config/currency";
 
 function PaymentReturnContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { addBalance } = useBalance();
-  const { user } = useAuth();
 
   const reply = searchParams.get("replyCode") || searchParams.get("Reply") || searchParams.get("reply") || "";
   const transId = searchParams.get("trans_id") || searchParams.get("TransID") || searchParams.get("transid") || "N/A";
   const amountStr = searchParams.get("trans_amount") || searchParams.get("Amount") || searchParams.get("amount") || "";
-  const currency = searchParams.get("trans_currency") || searchParams.get("Currency") || searchParams.get("currency") || "USD";
+  const currency = searchParams.get("trans_currency") || searchParams.get("Currency") || searchParams.get("currency") || "EUR";
   const order = searchParams.get("Order") || searchParams.get("order") || searchParams.get("orderNumber") || "";
 
   const isApproved = reply === "000";
@@ -33,10 +31,10 @@ function PaymentReturnContent() {
       if (!isNaN(numAmount) && numAmount > 0) {
         creditedRef.current = true;
         const amountGBP = convertToGBP(numAmount, currency === "USD" ? "USD" : "EUR");
-        addBalance(amountGBP);
+        addBalance(amountGBP, transId !== "N/A" ? transId : undefined);
       }
     }
-  }, [isApproved, amountStr, currency, addBalance]);
+  }, [isApproved, amountStr, currency, transId, addBalance]);
 
   useEffect(() => {
     if (countdown === 0 && (isApproved || isPending)) {
@@ -110,15 +108,11 @@ function PaymentReturnContent() {
           </div>
         )}
         {amountStr && (
-          <div className="flex justify-between border-b border-slate-200/60 pb-2">
+          <div className="flex justify-between pb-1">
             <span className="text-slate-500">Amount Paid</span>
             <span className="font-semibold text-slate-900">{amountStr} {currency}</span>
           </div>
         )}
-        <div className="flex justify-between pt-1">
-          <span className="text-slate-500">Reply Code</span>
-          <span className="font-mono font-semibold text-slate-900">{reply || "N/A"}</span>
-        </div>
       </div>
 
       <div className="mt-6 flex items-center justify-center space-x-2 text-xs text-slate-400">

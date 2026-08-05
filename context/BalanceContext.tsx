@@ -70,7 +70,7 @@ interface BalanceContextType {
   orders: Order[];
   proxyRequests: ProxyRequest[];
   transactions: Transaction[];
-  addBalance: (amountGBP: number) => Promise<boolean>;
+  addBalance: (amountGBP: number, transId?: string) => Promise<boolean>;
   purchaseService: (order: {
     platform: string;
     service: string;
@@ -168,7 +168,7 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
   );
 
   const addBalance = useCallback(
-    async (amountGBP: number): Promise<boolean> => {
+    async (amountGBP: number, transId?: string): Promise<boolean> => {
       let currentUser = user;
       if (!currentUser) {
         try {
@@ -178,14 +178,31 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
       }
       if (!currentUser) return false;
 
+      const gatewayTransId = transId || "";
+      const txnId = gatewayTransId ? `TXN-EZZYGATE-${gatewayTransId}` : "";
+
+      if (gatewayTransId && currentUser.transactions) {
+        const alreadyCredited = currentUser.transactions.some(
+          (t) => t.id === txnId || (t.description && t.description.includes(gatewayTransId))
+        );
+        if (alreadyCredited) {
+          return true;
+        }
+      }
+
       try {
         const res = await fetch("/api/user/top-up", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId: currentUser._id, amountGBP }),
+          body: JSON.stringify({ userId: currentUser._id, amountGBP, transId: gatewayTransId }),
         });
         const data = await res.json();
         if (data.success) {
+          if (data.alreadyProcessed) {
+            if (data.user) updateUser(data.user);
+            return true;
+          }
+
           if (data.user) {
             updateUser(data.user);
           } else {
@@ -194,11 +211,11 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
               balanceGBP: +((currentUser.balanceGBP || 0) + amountGBP).toFixed(2),
               transactions: [
                 {
-                  id: `TXN-${Date.now()}`,
+                  id: txnId || `TXN-${Date.now()}`,
                   type: "topup",
                   amountGBP,
                   currency: "GBP",
-                  description: "Wallet top-up",
+                  description: gatewayTransId ? `Ezzygate top-up (${gatewayTransId})` : "Wallet top-up",
                   status: "completed",
                   createdAt: new Date().toISOString(),
                 },
@@ -216,11 +233,11 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
           balanceGBP: +((currentUser.balanceGBP || 0) + amountGBP).toFixed(2),
           transactions: [
             {
-              id: `TXN-${Date.now()}`,
+              id: txnId || `TXN-${Date.now()}`,
               type: "topup",
               amountGBP,
               currency: "GBP",
-              description: "Wallet top-up",
+              description: gatewayTransId ? `Ezzygate top-up (${gatewayTransId})` : "Wallet top-up",
               status: "completed",
               createdAt: new Date().toISOString(),
             },

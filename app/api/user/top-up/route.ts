@@ -7,7 +7,7 @@ import { sendTopUpEmail } from "@/src/lib/email/resend";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, amountGBP } = body;
+    const { userId, amountGBP, transId, trans_id } = body;
 
     if (!userId || amountGBP === undefined) {
       return NextResponse.json(
@@ -24,6 +24,9 @@ export async function POST(request: Request) {
       );
     }
 
+    const gatewayTransId = transId || trans_id || "";
+    const txnId = gatewayTransId ? `TXN-EZZYGATE-${gatewayTransId}` : `TXN-${Date.now()}`;
+
     let isDbConnected = false;
     try {
       await connectDB();
@@ -35,14 +38,25 @@ export async function POST(request: Request) {
     if (isDbConnected && mongoose.Types.ObjectId.isValid(userId)) {
       const user = await User.findById(userId);
       if (user) {
-        const txnId = `TXN-${Date.now()}`;
+        const alreadyProcessed = gatewayTransId && user.transactions.some(
+          (t: { id: string; description?: string }) => t.id === txnId || (t.description && t.description.includes(gatewayTransId))
+        );
+
+        if (alreadyProcessed) {
+          return NextResponse.json({
+            success: true,
+            alreadyProcessed: true,
+            user: toSafeUser(user),
+          });
+        }
+
         user.balanceGBP = +(user.balanceGBP + amount).toFixed(2);
         user.transactions.unshift({
           id: txnId,
           type: "topup",
           amountGBP: amount,
           currency: "GBP",
-          description: "Wallet top-up",
+          description: gatewayTransId ? `Ezzygate top-up (${gatewayTransId})` : "Wallet top-up",
           status: "completed",
           createdAt: new Date(),
         });
@@ -66,6 +80,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       amountGBP: amount,
+      txnId,
       message: "Top-up credited in demo mode.",
     });
   } catch (error) {
