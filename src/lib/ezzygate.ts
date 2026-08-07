@@ -2,13 +2,13 @@ import crypto from "crypto";
 
 export const ezzygateConfig = {
   get merchantNumber(): string {
-    return process.env.EZZYGATE_MERCHANT_NUMBER || "2203441";
+    return process.env.EZZYGATE_MERCHANT_NUMBER || "";
   },
   get hashKey(): string {
-    return process.env.EZZYGATE_HASH_KEY || "2RN9TLWP52";
+    return process.env.EZZYGATE_HASH_KEY || "";
   },
   get securityKey(): string {
-    return process.env.EZZYGATE_SECURITY_KEY || process.env.EZZYGATE_HASH_KEY || "2RN9TLWP52";
+    return process.env.EZZYGATE_SECURITY_KEY || process.env.EZZYGATE_HASH_KEY || "";
   },
 };
 
@@ -47,6 +47,9 @@ export function generateEzzygateHostedPaymentUrl(params: EzzygateHostedPaymentPa
 } {
   const merchantID = params.merchantID || ezzygateConfig.merchantNumber;
   const hashKey = params.hashKey || ezzygateConfig.hashKey;
+  if (!merchantID || !hashKey) {
+    throw new Error("Ezzygate payment credentials are not configured.");
+  }
 
   const trans_amount = String(params.trans_amount);
   const trans_currency = (params.trans_currency || "EUR").toUpperCase();
@@ -107,6 +110,7 @@ export function verifyEzzygateHostedResponseSignature(
   if (!receivedSignature) return false;
 
   const key = hashKey || ezzygateConfig.hashKey;
+  if (!key) return false;
   const rawString = `${replyCode}${transId}${key}`;
   const expectedBase64 = crypto
     .createHash("sha256")
@@ -128,6 +132,9 @@ export function generateEzzygateStoragePaymentUrl(params?: {
 }): { storageUrl: string; signature: string } {
   const merchantID = params?.merchantID || ezzygateConfig.merchantNumber;
   const hashKey = params?.hashKey || ezzygateConfig.hashKey;
+  if (!merchantID || !hashKey) {
+    throw new Error("Ezzygate payment credentials are not configured.");
+  }
 
   const rawString = `${merchantID}${hashKey}`;
   const base64Signature = crypto

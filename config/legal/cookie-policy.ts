@@ -615,7 +615,7 @@ export const cookiePolicy: LegalDoc = {
               "virenza_currency (localStorage)",
               "Virenza Proxy",
               "Functional",
-              "Remembers your selected display currency",
+              "Remembers your selected checkout currency",
               "Until you clear browser storage",
             ],
           ],

@@ -20,14 +20,14 @@ const stats = [
   { value: "50+", label: "Locations", note: "Region filters included" },
   { value: "4", label: "Proxy types", note: "Datacenter, ISP, residential, mobile" },
   { value: "2", label: "Protocols", note: "HTTP & SOCKS5" },
-  { value: "5", label: "Currencies", note: "EUR default" },
+  { value: "3", label: "Checkout currencies", note: "EUR, GBP and USD" },
 ];
 
 const steps = [
   ["01", "Create account", "Sign up in under a minute and land straight in the proxy configurator."],
   ["02", "Choose network type", "Pick datacenter, static ISP, residential or mobile based on the workflow."],
   ["03", "Tune targeting", "Select country, optional city or carrier, protocol and authentication method."],
-  ["04", "Review pricing", "See the exact price before you confirm, in EUR, USD, GBP, UAH or PLN."],
+  ["04", "Review pricing", "Choose EUR, GBP or USD and see the exact price before you confirm."],
   ["05", "Start routing traffic", "Receive your credentials and point your tooling at the endpoint."],
 ];
 
@@ -39,7 +39,7 @@ const features = [
   { icon: KeyRound, title: "Username/password auth", text: "Rotate credentials from the dashboard without redeploying your tooling." },
   { icon: Globe2, title: "Country targeting", text: "Choose the exit country so region-gated content resolves as a local visitor sees it." },
   { icon: BarChart3, title: "Usage analytics", text: "Track bandwidth, requests and active sessions before a runaway job becomes an invoice." },
-  { icon: Wallet, title: "Balance management", text: "Top up a wallet and pay for orders from your balance, in your display currency." },
+  { icon: Wallet, title: "Balance management", text: "Top up and buy proxy services in EUR, GBP or USD with a single wallet." },
 ];
 
 export default function Home() {

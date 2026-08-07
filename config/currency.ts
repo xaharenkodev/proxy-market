@@ -1,29 +1,21 @@
 import { SupportedCurrency } from "./site";
 
-type CurrencyCode = SupportedCurrency | "GBP" | "PLN";
+export type CurrencyCode = SupportedCurrency;
+
+export function migrateStoredCurrency(value: unknown): CurrencyCode {
+  return value === "EUR" || value === "GBP" || value === "USD" ? value : "EUR";
+}
 
 const eurRates: Record<CurrencyCode, number> = {
   EUR: 1,
   USD: 1.08,
   GBP: 0.86,
-  UAH: 45,
-  PLN: 4.3,
-};
-
-const currencySymbols: Record<CurrencyCode, string> = {
-  EUR: "€",
-  USD: "$",
-  GBP: "£",
-  UAH: "₴",
-  PLN: "zł",
 };
 
 const currencyLocales: Record<CurrencyCode, string> = {
   EUR: "de-DE",
   USD: "en-US",
   GBP: "en-GB",
-  UAH: "uk-UA",
-  PLN: "pl-PL",
 };
 
 export function convertFromEUR(amountEUR: number, currency: CurrencyCode): number {
@@ -44,13 +36,8 @@ export function convertToGBP(amount: number, currency: CurrencyCode): number {
   return +(amountEUR * eurRates.GBP).toFixed(2);
 }
 
-export function getCurrencySymbol(currency: CurrencyCode): string {
-  return currencySymbols[currency];
-}
-
 export function formatCurrency(amountGBP: number, currency: CurrencyCode): string {
-  const converted = convertFromGBP(amountGBP, currency);
-  return formatAmount(converted, currency);
+  return formatAmount(convertFromGBP(amountGBP, currency), currency);
 }
 
 export function formatCurrencyFromEUR(amountEUR: number, currency: CurrencyCode): string {
@@ -58,12 +45,11 @@ export function formatCurrencyFromEUR(amountEUR: number, currency: CurrencyCode)
 }
 
 export function formatAmount(amount: number, currency: CurrencyCode): string {
-  const fractionDigits = currency === "UAH" ? 0 : 2;
   return new Intl.NumberFormat(currencyLocales[currency], {
     style: "currency",
     currency,
-    minimumFractionDigits: fractionDigits,
-    maximumFractionDigits: fractionDigits,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(amount);
 }
 

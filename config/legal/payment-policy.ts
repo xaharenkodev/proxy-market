@@ -119,7 +119,7 @@ export const paymentPolicy: LegalDoc = {
       ],
     },
     {
-      title: "Displayed Currency",
+      title: "Checkout Currency",
       blocks: [
         {
           type: "p",

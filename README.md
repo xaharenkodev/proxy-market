@@ -53,7 +53,7 @@ See `.env.example` for the full list.
 - Transaction records for purchases
 - Confirmation email to user + notification email to company
 - Balance display and test-mode top-up
-- Currency switcher (EUR, USD, UAH — display only)
+- Checkout currency switcher (EUR, GBP, USD)
 - Contact form with email delivery
 - All marketing pages (homepage, pricing, products, locations, use cases, FAQ, legal)
 - Responsive design across mobile/tablet/desktop
@@ -143,4 +143,4 @@ The User model has three embedded arrays:
 
 The old `orders` array and `/api/orders/create` route are untouched for backward compatibility. The current frontend never calls them.
 
-Balance is stored internally as GBP (`balanceGBP`). Currency conversion is frontend display only.
+Balance is stored internally as GBP (`balanceGBP`). EUR, GBP and USD are real checkout currencies; the corresponding GBP value is credited or deducted from the wallet.

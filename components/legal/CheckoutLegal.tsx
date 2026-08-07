@@ -36,7 +36,7 @@ export default function CheckoutLegal({ className = "" }: { className?: string }
       </div>
 
       <p className="mt-5 border-t border-slate-100 pt-4 text-xs leading-6 text-slate-500">
-        All prices are shown in the selected display currency. The final amount payable, including any applicable taxes,
+        You can buy in EUR, GBP or USD. The final amount payable, including any applicable taxes,
         is shown before you confirm. Proxy access is a digital service delivered on activation — see the digital delivery
         and refund policies below for how cancellation rights apply.
       </p>

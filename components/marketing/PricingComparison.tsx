@@ -13,7 +13,7 @@ export default function PricingComparison() {
   return (
     <div>
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-slate-600">Comparison values follow the selected display currency.</p>
+        <p className="text-sm text-slate-600">Prices and checkout use the selected currency: EUR, GBP or USD.</p>
         <CurrencySwitcher />
       </div>
       <TableShell>

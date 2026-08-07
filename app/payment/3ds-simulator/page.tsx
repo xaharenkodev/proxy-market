@@ -36,7 +36,7 @@ function SimulatorContent() {
           Signature: "TEST_SIMULATED_WEBHOOK_SIGNATURE",
         }).toString(),
       });
-    } catch (_err) {
+    } catch {
       // Ignore webhook network failure in test mode
     }
 

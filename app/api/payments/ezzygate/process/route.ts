@@ -1,69 +1,78 @@
+import crypto from "crypto";
+import mongoose from "mongoose";
 import { NextResponse } from "next/server";
+import { connectDB } from "@/src/lib/db/mongoose";
+import User, { IPaymentAttempt } from "@/src/lib/db/models/User";
+import { convertToGBP, CurrencyCode } from "@/config/currency";
 import { generateEzzygateHostedPaymentUrl } from "@/src/lib/ezzygate";
 import { logEzzygateEvent } from "@/src/lib/ezzygateLogger";
 
-export async function POST(req: Request) {
+export const runtime = "nodejs";
+
+const SUPPORTED_CURRENCIES = new Set<CurrencyCode>(["EUR", "GBP", "USD"]);
+
+function invoiceNumber(attemptId: string) {
+  return `INV-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${attemptId.slice(0, 8).toUpperCase()}`;
+}
+
+export async function POST(request: Request) {
   try {
-    const body = await req.json();
-    const { amount, currencyIso, merchantID, client_email, client_fullName } = body;
+    const body = await request.json();
+    const amount = Number(body.amount);
+    const currency = String(body.currencyIso || "").toUpperCase() as CurrencyCode;
+    const userId = String(body.userId || "");
 
-    const host = req.headers.get("host") || "localhost:3000";
-    const protocol = host.includes("localhost") ? "http" : "https";
-    
-    const url_redirect = `${protocol}://${host}/payment/return`;
-    const url_notify = `${protocol}://${host}/api/payments/ezzygate/webhook`;
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return NextResponse.json({ success: false, error: "A valid account is required." }, { status: 400 });
+    }
+    if (!SUPPORTED_CURRENCIES.has(currency)) {
+      return NextResponse.json({ success: false, error: "Supported payment currencies are EUR, GBP and USD." }, { status: 400 });
+    }
+    if (!Number.isFinite(amount) || amount <= 0 || amount > 100000) {
+      return NextResponse.json({ success: false, error: "Enter a valid payment amount." }, { status: 400 });
+    }
 
-    const trans_amount = amount ? String(amount) : "25";
-    const trans_currency = currencyIso || "EUR";
-    const email = client_email || "customer@virenzaproxy.com";
-    const fullName = client_fullName || "Customer";
+    await connectDB();
+    const user = await User.findById(userId);
+    if (!user) return NextResponse.json({ success: false, error: "User not found." }, { status: 404 });
+
+    const attemptId = crypto.randomUUID();
+    const roundedAmount = +amount.toFixed(2);
+    const paymentAttempt: IPaymentAttempt = {
+      id: attemptId,
+      amount: roundedAmount,
+      currency,
+      amountGBP: convertToGBP(roundedAmount, currency),
+      status: "pending",
+      invoiceNumber: invoiceNumber(attemptId),
+      emailStatus: "pending",
+      createdAt: new Date(),
+    };
+    user.paymentAttempts.unshift(paymentAttempt);
+    await user.save();
+
+    const origin = new URL(request.url).origin;
+    const urlRedirect = new URL("/payment/return", origin);
+    const urlNotify = new URL("/api/payments/ezzygate/webhook", origin);
+    urlRedirect.searchParams.set("attempt", attemptId);
+    urlNotify.searchParams.set("attempt", attemptId);
 
     const result = generateEzzygateHostedPaymentUrl({
-      merchantID,
-      trans_amount,
-      trans_currency,
+      trans_amount: roundedAmount.toFixed(2),
+      trans_currency: currency,
       trans_type: "0",
       trans_installments: "1",
-      client_email: email,
-      client_fullName: fullName,
-      url_redirect,
-      url_notify,
+      client_email: user.email,
+      client_fullName: `${user.name} ${user.surname}`.trim(),
+      url_redirect: urlRedirect.toString(),
+      url_notify: urlNotify.toString(),
     });
 
-    const curlCommand = `curl -X GET "${result.paymentUrl}"`;
-
-    const curlCommandPost = `curl -X POST "https://uiservices.ezzygate.com/hosted/" \\
-  -H "content-type: application/x-www-form-urlencoded" \\
-  -d "merchantID=${result.merchantID}&trans_amount=${result.trans_amount}&trans_currency=${result.trans_currency}&trans_type=0&trans_installments=1&client_email=${encodeURIComponent(email)}&signature=${result.urlEncodedSignature}&url_redirect=${encodeURIComponent(url_redirect)}&url_notify=${encodeURIComponent(url_notify)}"`;
-
-    logEzzygateEvent("request", {
-      endpoint: "https://uiservices.ezzygate.com/hosted/",
-      merchantID: result.merchantID,
-      trans_amount: result.trans_amount,
-      trans_currency: result.trans_currency,
-      trans_type: "0",
-      trans_installments: "1",
-      client_email: email,
-      client_fullName: fullName,
-      valuesString: result.valuesString,
-      base64Signature: result.base64Signature,
-      urlEncodedSignature: result.urlEncodedSignature,
-      url_redirect,
-      url_notify,
-      paymentUrl: result.paymentUrl,
-      curlCommand,
-      curlCommandPost,
-    });
-
-    return NextResponse.json({
-      success: true,
-      paymentUrl: result.paymentUrl,
-      curlCommand,
-      curlCommandPost,
-    });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Internal payment error";
-    logEzzygateEvent("request", { error: message });
-    return NextResponse.json({ success: false, error: message }, { status: 500 });
+    logEzzygateEvent("request", { attemptId, amount: roundedAmount, currency });
+    return NextResponse.json({ success: true, paymentUrl: result.paymentUrl, attemptId });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Payment initiation failed.";
+    console.error(`[payment:init] ${message}`);
+    return NextResponse.json({ success: false, error: "Payment initiation failed." }, { status: 500 });
   }
 }

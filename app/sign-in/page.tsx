@@ -62,6 +62,7 @@ export default function SignInPage() {
             <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-8">
               <Input label="Email" type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(""); }} />
               <Input label="Password" type="password" value={password} onChange={(e) => { setPassword(e.target.value); setError(""); }} />
+              <Link href="/forgot-password" className="block text-right text-sm font-semibold text-sky-700">Forgot password?</Link>
               {error && <p className="text-sm text-red-600">{error}</p>}
               <Button type="submit" fullWidth size="lg" disabled={loading}>
                 <LogIn size={18} />

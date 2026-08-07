@@ -1,202 +1,202 @@
 import { Resend } from "resend";
 import { env } from "@/src/config/env";
 import type { IOrder, IProxyRequest } from "@/src/lib/db/models/User";
+import { convertFromEUR, CurrencyCode, formatAmount } from "@/config/currency";
+import { generateInvoicePdf, InvoiceCustomer } from "@/src/lib/invoice";
 
-const resend = new Resend(env.RESEND_API);
-const from = env.EMAIL_FROM;
-const siteName = env.COMPANY_NAME;
-const appUrl = env.APP_URL;
+export interface EmailDeliveryResult {
+  sent: boolean;
+  id?: string;
+  error?: string;
+}
 
-export async function sendWelcomeEmail(user: { email: string; name: string }) {
-  await resend.emails.send({
-    from,
-    to: user.email,
-    subject: `Welcome to ${siteName}`,
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
-        <h1 style="color:#0284c7">Welcome to ${siteName}!</h1>
-        <p>Hi ${user.name},</p>
-        <p>Thank you for creating your account. You can now access the proxy marketplace dashboard.</p>
-        <p>Get started by reviewing pricing, topping up your balance, and configuring proxy workflows when provisioning is available.</p>
-        <a href="${appUrl}/dashboard" style="display:inline-block;background:#0284c7;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;margin:16px 0">Go to Dashboard</a>
-        <p style="color:#999;font-size:12px;margin-top:32px">— The ${siteName} Team</p>
-      </div>
-    `,
+export type EmailCustomer = InvoiceCustomer;
+
+function getEmailConfig() {
+  if (!env.RESEND_API) return { error: "RESEND_API is not configured." };
+  if (!env.EMAIL_FROM) return { error: "EMAIL_FROM is not configured." };
+  return { resend: new Resend(env.RESEND_API), from: env.EMAIL_FROM };
+}
+
+async function sendEmail(
+  kind: string,
+  to: string,
+  subject: string,
+  html: string,
+  idempotencyKey: string,
+  attachment?: { filename: string; content: Uint8Array }
+): Promise<EmailDeliveryResult> {
+  const config = getEmailConfig();
+  if ("error" in config) {
+    console.error(`[email:${kind}] ${config.error}`);
+    return { sent: false, error: config.error };
+  }
+
+  try {
+    const { data, error } = await config.resend.emails.send(
+      {
+        from: config.from,
+        to,
+        subject,
+        html,
+        attachments: attachment ? [{ filename: attachment.filename, content: Buffer.from(attachment.content) }] : undefined,
+      },
+      { idempotencyKey }
+    );
+    if (error) {
+      console.error(`[email:${kind}] ${error.message}`);
+      return { sent: false, error: error.message };
+    }
+    return { sent: true, id: data?.id };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unexpected email delivery error.";
+    console.error(`[email:${kind}] ${message}`);
+    return { sent: false, error: message };
+  }
+}
+
+function emailShell(title: string, content: string) {
+  return `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px"><h1 style="color:#0284c7">${title}</h1>${content}<p style="color:#999;font-size:12px;margin-top:32px">- The ${env.COMPANY_NAME} Team</p></div>`;
+}
+
+export async function sendWelcomeEmail(user: { email: string; name: string; id: string }) {
+  return sendEmail(
+    "welcome",
+    user.email,
+    `Welcome to ${env.COMPANY_NAME}`,
+    emailShell("Welcome!", `<p>Hi ${user.name},</p><p>Your account is ready. You can now review products, add balance and configure a proxy order.</p><a href="${env.APP_URL}/dashboard" style="display:inline-block;background:#0284c7;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;margin:16px 0">Go to dashboard</a>`),
+    `welcome/${user.id}`
+  );
+}
+
+export async function sendPasswordResetEmail(user: { email: string; name: string; id: string }, token: string) {
+  const resetUrl = new URL("/reset-password", env.APP_URL);
+  resetUrl.searchParams.set("token", token);
+  return sendEmail(
+    "password-reset",
+    user.email,
+    `Reset your ${env.COMPANY_NAME} password`,
+    emailShell("Reset your password", `<p>Hi ${user.name},</p><p>Use the link below to choose a new password. It expires in 60 minutes.</p><a href="${resetUrl.toString()}" style="display:inline-block;background:#0284c7;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;margin:16px 0">Reset password</a><p>If you did not request this, you can ignore this email.</p>`),
+    `password-reset/${user.id}/${token.slice(0, 12)}`
+  );
+}
+
+async function sendInvoiceEmail(options: {
+  kind: "top-up" | "proxy-request" | "order";
+  customer: EmailCustomer;
+  invoiceNumber: string;
+  reference: string;
+  description: string;
+  amount: number;
+  currency: CurrencyCode;
+  amountGBP?: number;
+  subject: string;
+  heading: string;
+  body: string;
+}) {
+  const pdf = await generateInvoicePdf({
+    invoiceNumber: options.invoiceNumber,
+    issuedAt: new Date(),
+    customer: options.customer,
+    description: options.description,
+    amount: options.amount,
+    currency: options.currency,
+    amountGBP: options.amountGBP,
+    reference: options.reference,
   });
+  return sendEmail(
+    options.kind,
+    options.customer.email,
+    options.subject,
+    emailShell(options.heading, `<p>Hi ${options.customer.name},</p>${options.body}<p>Your PDF Invoice / Receipt is attached.</p><a href="${env.APP_URL}/dashboard" style="display:inline-block;background:#0284c7;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;margin:16px 0">Open dashboard</a>`),
+    `${options.kind}/${options.reference}/${options.invoiceNumber}`,
+    { filename: `${options.invoiceNumber}.pdf`, content: pdf }
+  );
 }
 
 export async function sendTopUpEmail(
-  user: { email: string; name: string },
-  amountGBP: number
+  customer: EmailCustomer,
+  payment: { invoiceNumber: string; reference: string; amount: number; currency: CurrencyCode; amountGBP: number }
 ) {
-  await resend.emails.send({
-    from,
-    to: user.email,
+  return sendInvoiceEmail({
+    kind: "top-up",
+    customer,
+    invoiceNumber: payment.invoiceNumber,
+    reference: payment.reference,
+    description: "Wallet top-up",
+    amount: payment.amount,
+    currency: payment.currency,
+    amountGBP: payment.amountGBP,
     subject: "Your wallet top-up was successful",
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
-        <h1 style="color:#0284c7">Top-Up Successful</h1>
-        <p>Hi ${user.name},</p>
-        <p>Your wallet has been topped up with <strong>&pound;${amountGBP.toFixed(2)}</strong>.</p>
-        <p>You can now use your balance where supported by the dashboard flow.</p>
-        <a href="${appUrl}/dashboard" style="display:inline-block;background:#0284c7;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;margin:16px 0">View Dashboard</a>
-        <p style="color:#999;font-size:12px;margin-top:32px">— The ${siteName} Team</p>
-      </div>
-    `,
+    heading: "Top-up successful",
+    body: `<p>Your wallet top-up of <strong>${formatAmount(payment.amount, payment.currency)}</strong> was confirmed.</p>`,
   });
 }
 
 export async function sendOrderConfirmationEmail(
-  user: { email: string; name: string },
+  customer: EmailCustomer,
   order: IOrder
 ) {
-  await resend.emails.send({
-    from,
-    to: user.email,
+  return sendInvoiceEmail({
+    kind: "order",
+    customer,
+    invoiceNumber: order.invoiceNumber || `INV-${order.id}`,
+    reference: order.id,
+    description: `${order.packageName} x${order.quantity}`,
+    amount: order.priceGBP,
+    currency: "GBP",
+    amountGBP: order.priceGBP,
     subject: "Your order has been received",
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
-        <h1 style="color:#0284c7">Order Confirmed</h1>
-        <p>Hi ${user.name},</p>
-        <p>Your order has been received and is being processed.</p>
-        <table style="width:100%;border-collapse:collapse;margin:16px 0">
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Order ID</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold">${order.id}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Product area</td><td style="padding:8px;border-bottom:1px solid #eee">${order.platform}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Service type</td><td style="padding:8px;border-bottom:1px solid #eee">${order.service}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Package</td><td style="padding:8px;border-bottom:1px solid #eee">${order.packageName}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Quantity</td><td style="padding:8px;border-bottom:1px solid #eee">${order.quantity.toLocaleString()}</td></tr>
-          <tr><td style="padding:8px;color:#666">Price</td><td style="padding:8px;font-weight:bold">&pound;${order.priceGBP.toFixed(2)}</td></tr>
-        </table>
-        <a href="${appUrl}/dashboard" style="display:inline-block;background:#0284c7;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;margin:16px 0">Track Your Order</a>
-        <p style="color:#999;font-size:12px;margin-top:32px">— The ${siteName} Team</p>
-      </div>
-    `,
+    heading: "Order confirmed",
+    body: `<p>Your order <strong>${order.id}</strong> has been received and is being processed.</p>`,
   });
 }
 
 export async function sendProxyRequestConfirmation(
-  user: { email: string; name: string },
-  req: IProxyRequest
+  customer: EmailCustomer,
+  request: IProxyRequest
 ) {
-  const isPackage = req.requestKind === "ready-package";
-  const typeLabel = isPackage ? `Ready package: ${req.packageName}` : "Custom proxy setup";
-  await resend.emails.send({
-    from,
-    to: user.email,
-    subject: `Your proxy request has been received — ${siteName}`,
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
-        <h1 style="color:#0284c7">Proxy Request Received</h1>
-        <p>Hi ${user.name},</p>
-        <p>Your ${isPackage ? "ready package" : "custom proxy setup"} order has been confirmed and payment of <strong>&euro;${req.estimatedPriceEUR.toFixed(2)}</strong> was deducted from your account balance. Our team will review the setup and contact you shortly.</p>
-        <table style="width:100%;border-collapse:collapse;margin:16px 0">
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Request ID</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold">${req.id}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Request type</td><td style="padding:8px;border-bottom:1px solid #eee">${typeLabel}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Proxy type</td><td style="padding:8px;border-bottom:1px solid #eee">${req.proxyType}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Country</td><td style="padding:8px;border-bottom:1px solid #eee">${req.country}${req.city ? `, ${req.city}` : ""}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Protocol</td><td style="padding:8px;border-bottom:1px solid #eee">${req.protocol}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Rotation</td><td style="padding:8px;border-bottom:1px solid #eee">${req.rotation}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Quantity</td><td style="padding:8px;border-bottom:1px solid #eee">${req.quantity}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Bandwidth</td><td style="padding:8px;border-bottom:1px solid #eee">${req.bandwidthGb} GB</td></tr>
-          <tr><td style="padding:8px;color:#666">Estimated price</td><td style="padding:8px;font-weight:bold">&euro;${req.estimatedPriceEUR.toFixed(2)}</td></tr>
-        </table>
-        <p style="color:#666;font-size:13px">Payment has been deducted from your balance. Our team will review and set up your proxies. Proxy credentials are not issued automatically yet.</p>
-        <a href="${appUrl}/dashboard/orders" style="display:inline-block;background:#0284c7;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;margin:16px 0">View Your Requests</a>
-        <p style="color:#999;font-size:12px;margin-top:32px">— The ${siteName} Team</p>
-      </div>
-    `,
+  const currency = (request.displayCurrency === "USD" || request.displayCurrency === "GBP" || request.displayCurrency === "EUR" ? request.displayCurrency : "EUR") as CurrencyCode;
+  const amount = request.estimatedPriceEUR;
+  const visibleAmount = convertFromEUR(amount, currency);
+  return sendInvoiceEmail({
+    kind: "proxy-request",
+    customer,
+    invoiceNumber: request.invoiceNumber || `INV-${request.id}`,
+    reference: request.id,
+    description: `${request.proxyType} proxy order - ${request.durationQuantity || 1} ${request.duration}`,
+    amount: visibleAmount,
+    currency,
+    amountGBP: request.priceGBP,
+    subject: `Your proxy order has been received - ${env.COMPANY_NAME}`,
+    heading: "Proxy order confirmed",
+    body: `<p>Your order <strong>${request.id}</strong> was paid from your balance. Our team will review the setup and contact you shortly.</p>`,
   });
 }
 
 export async function sendProxyRequestNotification(
   customer: { name: string; surname: string; email: string; phone: string },
-  req: IProxyRequest
+  request: IProxyRequest
 ) {
-  const to = env.COMPANY_EMAIL || from;
-  const isPackage = req.requestKind === "ready-package";
-  const typeLabel = isPackage ? `Ready package: ${req.packageName}` : "Custom setup";
-  await resend.emails.send({
-    from,
-    to,
-    subject: `${isPackage ? "📦" : "⚙️"} ${typeLabel} — ${customer.name} ${customer.surname} — ${req.id}`,
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
-        <h1 style="color:#0284c7">New Proxy Request — ${typeLabel}</h1>
-        <h2 style="color:#333;margin-top:16px">Customer</h2>
-        <table style="width:100%;border-collapse:collapse;margin:8px 0 16px">
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Name</td><td style="padding:8px;border-bottom:1px solid #eee">${customer.name} ${customer.surname}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Email</td><td style="padding:8px;border-bottom:1px solid #eee"><a href="mailto:${customer.email}">${customer.email}</a></td></tr>
-          <tr><td style="padding:8px;color:#666">Phone</td><td style="padding:8px">${customer.phone}</td></tr>
-        </table>
-        <h2 style="color:#333">Request Details</h2>
-        <table style="width:100%;border-collapse:collapse;margin:8px 0">
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Request ID</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold">${req.id}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Proxy type</td><td style="padding:8px;border-bottom:1px solid #eee">${req.proxyType}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Country</td><td style="padding:8px;border-bottom:1px solid #eee">${req.country}${req.city ? `, ${req.city}` : ""}${req.carrier ? ` (${req.carrier})` : ""}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Protocol</td><td style="padding:8px;border-bottom:1px solid #eee">${req.protocol}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Rotation</td><td style="padding:8px;border-bottom:1px solid #eee">${req.rotation}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Auth method</td><td style="padding:8px;border-bottom:1px solid #eee">${req.authMethod}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Quantity</td><td style="padding:8px;border-bottom:1px solid #eee">${req.quantity}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Bandwidth</td><td style="padding:8px;border-bottom:1px solid #eee">${req.bandwidthGb} GB</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Duration</td><td style="padding:8px;border-bottom:1px solid #eee">${req.duration}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Display currency</td><td style="padding:8px;border-bottom:1px solid #eee">${req.displayCurrency}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Price EUR</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold">&euro;${req.estimatedPriceEUR.toFixed(2)}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Price GBP (deducted)</td><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold">&pound;${(req.priceGBP ?? 0).toFixed(2)}</td></tr>
-          <tr><td style="padding:8px;color:#666">Payment</td><td style="padding:8px;font-weight:bold;color:#059669">Paid from balance</td></tr>
-        </table>
-        <p style="color:#666;font-size:13px;margin-top:16px">Submitted: ${req.createdAt.toISOString()}</p>
-      </div>
-    `,
-  });
+  const recipient = env.COMPANY_EMAIL || env.EMAIL_FROM;
+  if (!recipient) return { sent: false, error: "COMPANY_EMAIL or EMAIL_FROM is not configured." };
+  return sendEmail(
+    "proxy-request-notification",
+    recipient,
+    `New proxy request ${request.id}`,
+    emailShell("New proxy request", `<p><strong>Customer:</strong> ${customer.name} ${customer.surname}</p><p><strong>Request:</strong> ${request.id}</p><p><strong>Product:</strong> ${request.proxyType}</p><p><strong>Location:</strong> ${request.country}${request.city ? `, ${request.city}` : ""}</p>`),
+    `proxy-request-notification/${request.id}`
+  );
 }
 
-interface ContactData {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-}
+interface ContactData { name: string; email: string; subject: string; message: string; }
 
 export async function sendContactMessageEmail(data: ContactData) {
-  const to = env.COMPANY_EMAIL || from;
-  await resend.emails.send({
-    from,
-    to,
-    subject: `New contact form message: ${data.subject}`,
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
-        <h1 style="color:#0284c7">New Contact Message</h1>
-        <table style="width:100%;border-collapse:collapse;margin:16px 0">
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Name</td><td style="padding:8px;border-bottom:1px solid #eee">${data.name}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Email</td><td style="padding:8px;border-bottom:1px solid #eee">${data.email}</td></tr>
-          <tr><td style="padding:8px;border-bottom:1px solid #eee;color:#666">Subject</td><td style="padding:8px;border-bottom:1px solid #eee">${data.subject}</td></tr>
-        </table>
-        <div style="background:#f9fafb;padding:16px;border-radius:8px;margin:16px 0">
-          <p style="margin:0;white-space:pre-wrap">${data.message}</p>
-        </div>
-      </div>
-    `,
-  });
+  const recipient = env.COMPANY_EMAIL || env.EMAIL_FROM;
+  if (!recipient) return { sent: false, error: "COMPANY_EMAIL or EMAIL_FROM is not configured." };
+  return sendEmail("contact", recipient, `New contact form message: ${data.subject}`, emailShell("New contact message", `<p><strong>From:</strong> ${data.name}</p><p><strong>Email:</strong> ${data.email}</p><p>${data.message}</p>`), `contact/${data.email}/${data.subject}`);
 }
 
 export async function sendContactAutoReply(data: ContactData) {
-  await resend.emails.send({
-    from,
-    to: data.email,
-    subject: `We received your message — ${siteName}`,
-    html: `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
-        <h1 style="color:#0284c7">Thank You for Contacting Us</h1>
-        <p>Hi ${data.name},</p>
-        <p>We received your message and will get back to you as soon as possible.</p>
-        <p>For reference, here is a copy of your message:</p>
-        <div style="background:#f9fafb;padding:16px;border-radius:8px;margin:16px 0">
-          <p style="margin:0;font-weight:bold">${data.subject}</p>
-          <p style="margin:8px 0 0;white-space:pre-wrap">${data.message}</p>
-        </div>
-        <a href="${appUrl}" style="display:inline-block;background:#0284c7;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;margin:16px 0">Visit ${siteName}</a>
-        <p style="color:#999;font-size:12px;margin-top:32px">— The ${siteName} Team</p>
-      </div>
-    `,
-  });
+  return sendEmail("contact-auto-reply", data.email, `We received your message - ${env.COMPANY_NAME}`, emailShell("Thanks for contacting us", `<p>Hi ${data.name},</p><p>We received your message and will respond as soon as possible.</p>`), `contact-auto-reply/${data.email}/${data.subject}`);
 }

@@ -192,7 +192,7 @@ export default function Header() {
                     </Link>
                   ))}
                   <div className="mt-3 flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
-                    <span className="text-xs font-semibold text-slate-500">Display currency</span>
+                    <span className="text-xs font-semibold text-slate-500">Checkout currency</span>
                     <CurrencySwitcher compact />
                   </div>
                   <div className="mt-3 grid grid-cols-2 gap-3">

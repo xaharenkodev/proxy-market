@@ -30,7 +30,7 @@ export default function PremiumHero() {
           >
             <span className="flex items-center gap-1.5 text-sky-700"><ShieldCheck size={15} /> Premium proxy marketplace</span>
             <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block" />
-            <span className="hidden sm:inline">EUR pricing with multi-currency display</span>
+            <span className="hidden sm:inline">Buy in EUR, GBP or USD</span>
           </motion.div>
 
           <motion.h1
@@ -87,7 +87,7 @@ export default function PremiumHero() {
           {[
             { icon: Zap, title: "Fast setup UI", text: "Step-based configurator" },
             { icon: ShieldCheck, title: "Safe-use copy", text: "Compliance-first wording" },
-            { icon: CheckCircle2, title: "Balanced pricing", text: "Multi-currency display" },
+            { icon: CheckCircle2, title: "Three checkout currencies", text: "EUR, GBP and USD" },
             { icon: Globe2, title: "Global locations", text: chips.join(" · ") },
           ].map(({ icon: Icon, title, text }) => (
             <motion.div
