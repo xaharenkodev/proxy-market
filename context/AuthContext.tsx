@@ -23,10 +23,13 @@ export interface AuthProxyRequest {
   quantity: number;
   bandwidthGb: number;
   duration: string;
+  durationQuantity?: number;
   estimatedPriceEUR: number;
   priceGBP?: number;
   displayCurrency: string;
   status: "paid" | "requested" | "reviewing" | "confirmed" | "completed" | "cancelled";
+  invoiceNumber?: string;
+  emailStatus?: "pending" | "sent" | "failed";
   paidAt?: string;
   createdAt: string;
 }
@@ -59,6 +62,8 @@ export interface AuthTransaction {
   currency: "GBP";
   description: string;
   status: "pending" | "completed" | "failed";
+  invoiceNumber?: string;
+  emailStatus?: "pending" | "sent" | "failed";
   createdAt: string;
 }
 
@@ -72,6 +77,8 @@ export interface AuthOrder {
   targetUrl?: string;
   targetHandle?: string;
   status: "processing" | "in_progress" | "completed" | "failed";
+  invoiceNumber?: string;
+  emailStatus?: "pending" | "sent" | "failed";
   createdAt: string;
 }
 

@@ -15,13 +15,7 @@ import { packageTemplates } from "@/config/packages";
 import { formatCurrencyFromEUR } from "@/config/currency";
 import { useBalance } from "@/context/BalanceContext";
 import { useAuth } from "@/context/AuthContext";
-
-const baseGbPrice: Record<string, number> = {
-  datacenter: 1.6, "static-residential": 3.49, residential: 2.19, mobile: 6.49,
-};
-const durationMultiplier: Record<string, number> = {
-  daily: 1.1, weekly: 5.5, monthly: 18, "pay-per-gb": 1,
-};
+import { calculateProxyPrice, getDefaultDurationQuantity, ProxyDuration } from "@/src/lib/pricing";
 
 type Tab = "packages" | "custom";
 
@@ -50,17 +44,25 @@ export default function BuyProxyForm() {
   const [quantity, setQuantity] = useState("1");
   const [bandwidth, setBandwidth] = useState("5");
   const [duration, setDuration] = useState("pay-per-gb");
+  const [durationQuantity, setDurationQuantity] = useState("1");
   const [rotation, setRotation] = useState("rotating");
   const [protocol, setProtocol] = useState("HTTP");
   const [authMethod, setAuthMethod] = useState("Username/password");
 
   const selectedProduct = availableProducts.find((p) => p.id === productId) || availableProducts[0];
   const estimatedPriceEUR = useMemo(() => {
-    const qty = Math.max(Number(quantity) || 1, 1);
-    const gb = Math.max(Number(bandwidth) || 1, 1);
-    const base = baseGbPrice[productId] || 2.19;
-    return +(qty * gb * base * durationMultiplier[duration]).toFixed(2);
-  }, [bandwidth, duration, productId, quantity]);
+    try {
+      return calculateProxyPrice({
+        proxyType: productId,
+        duration: duration as ProxyDuration,
+        quantity: Number(quantity),
+        durationQuantity: Number(durationQuantity),
+        bandwidthGb: Number(bandwidth),
+      }).estimatedPriceEUR;
+    } catch {
+      return 0;
+    }
+  }, [bandwidth, duration, durationQuantity, productId, quantity]);
 
   // Location-derived data for ready packages
   const pkgLocation = getLocationByCountry(pkgCountry);
@@ -131,7 +133,7 @@ export default function BuyProxyForm() {
           userId: user._id, requestKind: "custom", proxyType: productId, country,
           city: city || undefined, carrier: carrier || undefined, protocol, rotation,
           authMethod, quantity: Number(quantity) || 1, bandwidthGb: Number(bandwidth) || 1,
-          duration, estimatedPriceEUR, displayCurrency,
+          duration, durationQuantity: Number(durationQuantity) || 1, displayCurrency,
         }),
       });
       const data = await handleApiResponse(res);
@@ -337,8 +339,12 @@ export default function BuyProxyForm() {
                   <Input label="City (if available)" value={city} onChange={(e) => setCity(e.target.value)} placeholder="Optional" />
                   <Input label="Carrier (mobile only)" value={carrier} onChange={(e) => setCarrier(e.target.value)} placeholder="Optional" />
                   <Input label="Quantity" type="number" min={1} value={quantity} onChange={(e) => setQuantity(e.target.value)} />
-                  <Input label="Bandwidth / GB" type="number" min={1} value={bandwidth} onChange={(e) => setBandwidth(e.target.value)} />
-                  <Select label="Plan duration" value={duration} onChange={(e) => setDuration(e.target.value)} options={[{ value: "daily", label: "Daily" }, { value: "weekly", label: "Weekly" }, { value: "monthly", label: "Monthly" }, { value: "pay-per-gb", label: "Pay-per-GB" }]} />
+                  {duration === "pay-per-gb" ? (
+                    <Input label="Bandwidth per proxy / GB" type="number" min={1} value={bandwidth} onChange={(e) => setBandwidth(e.target.value)} />
+                  ) : (
+                    <Input label={duration === "daily" ? "Number of days" : duration === "weekly" ? "Number of weeks" : "Number of months"} type="number" min={1} value={durationQuantity} onChange={(e) => setDurationQuantity(e.target.value)} />
+                  )}
+                  <Select label="Plan duration" value={duration} onChange={(e) => { const next = e.target.value as ProxyDuration; setDuration(next); setDurationQuantity(getDefaultDurationQuantity(next).toString()); }} options={[{ value: "daily", label: "Daily" }, { value: "weekly", label: "Weekly" }, { value: "monthly", label: "Monthly" }, { value: "pay-per-gb", label: "Pay-per-GB" }]} />
                   <Select label="Rotation type" value={rotation} onChange={(e) => setRotation(e.target.value)} options={[{ value: "rotating", label: "Rotating" }, { value: "sticky", label: "Sticky" }]} />
                 </div>
                 <div className="mt-5 grid gap-4 sm:mt-6 sm:grid-cols-2">
@@ -370,10 +376,10 @@ export default function BuyProxyForm() {
             <div className="mt-5 rounded-2xl bg-[linear-gradient(135deg,#0f172a,#075985)] p-4 text-white sm:mt-6 sm:rounded-3xl sm:p-5">
               <p className="text-sm text-sky-100">Total price</p>
               <p className="mt-1 text-3xl font-bold sm:text-4xl">{formatCurrencyFromEUR(estimatedPriceEUR, displayCurrency)}</p>
-              <p className="mt-2 text-xs text-sky-100">EUR base: €{estimatedPriceEUR.toFixed(2)}</p>
+              <p className="mt-2 text-xs text-sky-100">EUR base: EUR {estimatedPriceEUR.toFixed(2)}</p>
             </div>
             <dl className="mt-5 space-y-2.5 text-sm sm:mt-6 sm:space-y-3">
-              {[["Product", selectedProduct.name], ["Location", city ? `${country}, ${city}` : country], ["Rotation", rotation], ["Duration", duration === "pay-per-gb" ? "Traffic-based" : duration]].map(([label, value]) => (
+              {[["Product", selectedProduct.name], ["Location", city ? `${country}, ${city}` : country], ["Rotation", rotation], ["Duration", duration === "pay-per-gb" ? `${bandwidth} GB per proxy` : `${durationQuantity} ${duration === "daily" ? "day(s)" : duration === "weekly" ? "week(s)" : "month(s)"}`]].map(([label, value]) => (
                 <div key={label} className="flex justify-between gap-3 border-b border-slate-100 pb-2.5 sm:pb-3">
                   <dt className="text-slate-500">{label}</dt>
                   <dd className="min-w-0 truncate text-right font-bold text-slate-950">{value}</dd>

@@ -65,7 +65,7 @@ export default function EzzygatePaymentModal({
       setTimeout(() => {
         window.location.href = redirectUrl;
       }, 1000);
-    } catch (_err) {
+    } catch {
       setError("An unexpected network error occurred.");
       setLoading(false);
     }

@@ -1,8 +1,6 @@
 import mongoose from "mongoose";
 import { env } from "@/src/config/env";
 
-const MONGODB_URI = env.MONGODB_URI;
-
 interface CachedConnection {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
@@ -24,8 +22,13 @@ if (!globalWithMongoose.mongooseCache) {
 export async function connectDB(): Promise<typeof mongoose> {
   if (cached.conn) return cached.conn;
 
+  const mongoUri = env.MONGODB_URI;
+  if (!mongoUri) {
+    throw new Error("MONGODB_URI is not configured.");
+  }
+
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
+    cached.promise = mongoose.connect(mongoUri, {
       bufferCommands: false,
     });
   }

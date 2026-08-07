@@ -33,7 +33,7 @@ export const faqItems: FAQItem[] = [
     category: "Billing",
     question: "How does billing work?",
     answer:
-      "You top up a wallet balance and orders are paid from it. Prices are quoted in EUR and can be displayed in USD, GBP, UAH or PLN. The final amount payable, including any applicable taxes, is shown before you confirm.",
+      "You top up your wallet and buy proxy services in EUR, GBP or USD. Your selected currency is used for checkout and your Invoice / Receipt; the final amount is shown before you confirm.",
   },
   {
     category: "Billing",

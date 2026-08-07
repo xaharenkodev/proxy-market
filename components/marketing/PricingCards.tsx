@@ -34,7 +34,7 @@ export default function PricingCards({
     <div>
       {showSwitcher && (
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-slate-600">Switch visible planning currency. Checkout logic is unchanged.</p>
+          <p className="text-sm text-slate-600">Choose EUR, GBP or USD for prices, checkout and your Invoice / Receipt.</p>
           <CurrencySwitcher />
         </div>
       )}

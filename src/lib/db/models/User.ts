@@ -7,6 +7,10 @@ export interface ITransaction {
   currency: "GBP";
   description: string;
   status: "pending" | "completed" | "failed";
+  invoiceNumber?: string;
+  invoiceIssuedAt?: Date;
+  emailStatus?: "pending" | "sent" | "failed";
+  emailId?: string;
   createdAt: Date;
 }
 
@@ -20,6 +24,10 @@ export interface IOrder {
   targetUrl?: string;
   targetHandle?: string;
   status: "processing" | "in_progress" | "completed" | "failed";
+  invoiceNumber?: string;
+  invoiceIssuedAt?: Date;
+  emailStatus?: "pending" | "sent" | "failed";
+  emailId?: string;
   createdAt: Date;
 }
 
@@ -37,12 +45,31 @@ export interface IProxyRequest {
   quantity: number;
   bandwidthGb: number;
   duration: string;
+  durationQuantity?: number;
   estimatedPriceEUR: number;
   priceGBP?: number;
   displayCurrency: string;
   status: "paid" | "requested" | "reviewing" | "confirmed" | "completed" | "cancelled";
+  invoiceNumber?: string;
+  invoiceIssuedAt?: Date;
+  emailStatus?: "pending" | "sent" | "failed";
+  emailId?: string;
   paidAt?: Date;
   createdAt: Date;
+}
+
+export interface IPaymentAttempt {
+  id: string;
+  amount: number;
+  currency: "EUR" | "GBP" | "USD";
+  amountGBP: number;
+  status: "pending" | "approved" | "declined" | "failed";
+  invoiceNumber: string;
+  transactionId?: string;
+  emailStatus?: "pending" | "sent" | "failed";
+  emailId?: string;
+  createdAt: Date;
+  completedAt?: Date;
 }
 
 export interface IUser extends Document {
@@ -59,9 +86,12 @@ export interface IUser extends Document {
     postCode: string;
   };
   balanceGBP: number;
+  passwordResetTokenHash?: string;
+  passwordResetExpiresAt?: Date;
   transactions: ITransaction[];
   orders: IOrder[];
   proxyRequests: IProxyRequest[];
+  paymentAttempts: IPaymentAttempt[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -82,6 +112,10 @@ const TransactionSchema = new Schema<ITransaction>(
       enum: ["pending", "completed", "failed"],
       required: true,
     },
+    invoiceNumber: { type: String },
+    invoiceIssuedAt: { type: Date },
+    emailStatus: { type: String, enum: ["pending", "sent", "failed"] },
+    emailId: { type: String },
     createdAt: { type: Date, default: Date.now },
   },
   { _id: false }
@@ -110,6 +144,10 @@ const OrderSchema = new Schema<IOrder>(
       enum: ["processing", "in_progress", "completed", "failed"],
       default: "processing",
     },
+    invoiceNumber: { type: String },
+    invoiceIssuedAt: { type: Date },
+    emailStatus: { type: String, enum: ["pending", "sent", "failed"] },
+    emailId: { type: String },
     createdAt: { type: Date, default: Date.now },
   },
   { _id: false }
@@ -130,6 +168,7 @@ const ProxyRequestSchema = new Schema<IProxyRequest>(
     quantity: { type: Number, required: true },
     bandwidthGb: { type: Number, required: true },
     duration: { type: String, required: true },
+    durationQuantity: { type: Number },
     estimatedPriceEUR: { type: Number, required: true },
     priceGBP: { type: Number },
     displayCurrency: { type: String, required: true },
@@ -138,8 +177,29 @@ const ProxyRequestSchema = new Schema<IProxyRequest>(
       enum: ["paid", "requested", "reviewing", "confirmed", "completed", "cancelled"],
       default: "requested",
     },
+    invoiceNumber: { type: String },
+    invoiceIssuedAt: { type: Date },
+    emailStatus: { type: String, enum: ["pending", "sent", "failed"] },
+    emailId: { type: String },
     paidAt: { type: Date },
     createdAt: { type: Date, default: Date.now },
+  },
+  { _id: false }
+);
+
+const PaymentAttemptSchema = new Schema<IPaymentAttempt>(
+  {
+    id: { type: String, required: true },
+    amount: { type: Number, required: true, min: 0.01 },
+    currency: { type: String, enum: ["EUR", "GBP", "USD"], required: true },
+    amountGBP: { type: Number, required: true, min: 0.01 },
+    status: { type: String, enum: ["pending", "approved", "declined", "failed"], default: "pending" },
+    invoiceNumber: { type: String, required: true },
+    transactionId: { type: String },
+    emailStatus: { type: String, enum: ["pending", "sent", "failed"] },
+    emailId: { type: String },
+    createdAt: { type: Date, default: Date.now },
+    completedAt: { type: Date },
   },
   { _id: false }
 );
@@ -165,9 +225,12 @@ const UserSchema = new Schema<IUser>(
       postCode: { type: String, required: true },
     },
     balanceGBP: { type: Number, default: 0, min: 0 },
+    passwordResetTokenHash: { type: String, select: false },
+    passwordResetExpiresAt: { type: Date, select: false },
     transactions: { type: [TransactionSchema], default: [] },
     orders: { type: [OrderSchema], default: [] },
     proxyRequests: { type: [ProxyRequestSchema], default: [] },
+    paymentAttempts: { type: [PaymentAttemptSchema], default: [] },
   },
   { timestamps: true }
 );

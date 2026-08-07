@@ -10,7 +10,7 @@ import {
   ReactNode,
 } from "react";
 import { SupportedCurrency } from "@/config/site";
-import { formatCurrency } from "@/config/currency";
+import { formatCurrency, migrateStoredCurrency } from "@/config/currency";
 import { useAuth, AuthUser, AuthProxyRequest } from "@/context/AuthContext";
 
 const CURRENCY_STORAGE_KEY = "virenza_currency";
@@ -49,6 +49,7 @@ export interface ProxyRequest {
   quantity: number;
   bandwidthGb: number;
   duration: string;
+  durationQuantity?: number;
   estimatedPriceEUR: number;
   priceGBP?: number;
   displayCurrency: string;
@@ -110,6 +111,7 @@ function mapProxyRequests(user: AuthUser): ProxyRequest[] {
     quantity: r.quantity,
     bandwidthGb: r.bandwidthGb,
     duration: r.duration,
+    durationQuantity: r.durationQuantity,
     estimatedPriceEUR: r.estimatedPriceEUR,
     priceGBP: r.priceGBP,
     displayCurrency: r.displayCurrency,
@@ -141,8 +143,10 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
       try {
         const stored =
           localStorage.getItem(CURRENCY_STORAGE_KEY) ?? localStorage.getItem(LEGACY_CURRENCY_STORAGE_KEY);
-        if (stored === "EUR" || stored === "USD" || stored === "UAH") {
-          setDisplayCurrencyState(stored);
+        if (stored) {
+          const currency = migrateStoredCurrency(stored);
+          setDisplayCurrencyState(currency);
+          if (currency !== stored) localStorage.setItem(CURRENCY_STORAGE_KEY, currency);
         }
       } catch {}
     }, 0);
@@ -205,47 +209,13 @@ export function BalanceProvider({ children }: { children: ReactNode }) {
 
           if (data.user) {
             updateUser(data.user);
-          } else {
-            const updatedUser: AuthUser = {
-              ...currentUser,
-              balanceGBP: +((currentUser.balanceGBP || 0) + amountGBP).toFixed(2),
-              transactions: [
-                {
-                  id: txnId || `TXN-${Date.now()}`,
-                  type: "topup",
-                  amountGBP,
-                  currency: "GBP",
-                  description: gatewayTransId ? `Ezzygate top-up (${gatewayTransId})` : "Wallet top-up",
-                  status: "completed",
-                  createdAt: new Date().toISOString(),
-                },
-                ...(currentUser.transactions || []),
-              ],
-            };
-            updateUser(updatedUser);
+            return true;
           }
-          return true;
+          return false;
         }
         return false;
       } catch {
-        const updatedUser: AuthUser = {
-          ...currentUser,
-          balanceGBP: +((currentUser.balanceGBP || 0) + amountGBP).toFixed(2),
-          transactions: [
-            {
-              id: txnId || `TXN-${Date.now()}`,
-              type: "topup",
-              amountGBP,
-              currency: "GBP",
-              description: gatewayTransId ? `Ezzygate top-up (${gatewayTransId})` : "Wallet top-up",
-              status: "completed",
-              createdAt: new Date().toISOString(),
-            },
-            ...(currentUser.transactions || []),
-          ],
-        };
-        updateUser(updatedUser);
-        return true;
+        return false;
       }
     },
     [user, updateUser]

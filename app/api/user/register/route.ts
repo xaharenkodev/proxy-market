@@ -75,14 +75,11 @@ export async function POST(request: Request) {
         orders: [],
       });
 
-      try {
-        await sendWelcomeEmail({ email: user.email, name: user.name });
-      } catch {
-        // Email failure should not block registration
-      }
+      const delivery = await sendWelcomeEmail({ email: user.email, name: user.name, id: user._id.toString() });
+      if (!delivery.sent) console.error("[registration] welcome email was not sent");
 
       return NextResponse.json(
-        { success: true, user: toSafeUser(user) },
+        { success: true, user: toSafeUser(user), emailSent: delivery.sent },
         { status: 201 }
       );
     }

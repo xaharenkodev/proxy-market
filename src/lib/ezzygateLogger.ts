@@ -1,60 +1,33 @@
-import fs from "fs";
-import path from "path";
-
 export interface EzzygateLogEntry {
   id: string;
   timestamp: string;
   type: "request" | "response" | "webhook" | "redirect";
-  data: unknown;
+  data: Record<string, unknown>;
 }
 
-const LOG_DIR = path.join(process.cwd(), "logs");
-const LOG_FILE = path.join(LOG_DIR, "ezzygate_history.json");
+const MAX_SAFE_VALUE_LENGTH = 120;
+const BLOCKED_KEYS = /signature|hash|key|email|name|phone|url|curl|valuestring/i;
 
-function ensureLogDirExists() {
-  if (!fs.existsSync(LOG_DIR)) {
-    fs.mkdirSync(LOG_DIR, { recursive: true });
-  }
+function sanitize(data: unknown): Record<string, unknown> {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return { detail: "event recorded" };
+  return Object.fromEntries(
+    Object.entries(data as Record<string, unknown>)
+      .filter(([key]) => !BLOCKED_KEYS.test(key))
+      .map(([key, value]) => [key, typeof value === "string" ? value.slice(0, MAX_SAFE_VALUE_LENGTH) : value])
+  );
 }
 
 export function logEzzygateEvent(type: EzzygateLogEntry["type"], data: unknown): EzzygateLogEntry {
-  ensureLogDirExists();
-
   const entry: EzzygateLogEntry = {
-    id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    id: `payment-${Date.now()}`,
     timestamp: new Date().toISOString(),
     type,
-    data,
+    data: sanitize(data),
   };
-
-  try {
-    let history: EzzygateLogEntry[] = [];
-    if (fs.existsSync(LOG_FILE)) {
-      const content = fs.readFileSync(LOG_FILE, "utf-8").trim();
-      if (content) {
-        try {
-          history = JSON.parse(content);
-        } catch {
-          history = [];
-        }
-      }
-    }
-    history.unshift(entry);
-    if (history.length > 100) history = history.slice(0, 100);
-    fs.writeFileSync(LOG_FILE, JSON.stringify(history, null, 2), "utf-8");
-  } catch (err) {
-    console.error("Failed to write Ezzygate log entry:", err);
-  }
-
+  console.info("[ezzygate]", JSON.stringify(entry));
   return entry;
 }
 
 export function getEzzygateLogs(): EzzygateLogEntry[] {
-  try {
-    if (fs.existsSync(LOG_FILE)) {
-      const content = fs.readFileSync(LOG_FILE, "utf-8").trim();
-      if (content) return JSON.parse(content);
-    }
-  } catch (_err) {}
   return [];
 }

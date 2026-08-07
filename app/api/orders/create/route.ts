@@ -119,6 +119,7 @@ export async function POST(request: Request) {
       );
     }
 
+    const now = new Date();
     const orderId = `ORD-${Date.now()}`;
     const order: IOrder = {
       id: orderId,
@@ -130,31 +131,42 @@ export async function POST(request: Request) {
       targetUrl: targetUrl || undefined,
       targetHandle: targetHandle || undefined,
       status: "processing",
-      createdAt: new Date(),
+      invoiceNumber: `INV-${now.toISOString().slice(0, 10).replaceAll("-", "")}-${orderId.slice(-8)}`,
+      invoiceIssuedAt: now,
+      emailStatus: "pending",
+      createdAt: now,
     };
 
     user.balanceGBP = +(user.balanceGBP - price).toFixed(2);
     user.orders.unshift(order);
+    const transactionId = `TXN-${Date.now()}`;
     user.transactions.unshift({
-      id: `TXN-${Date.now()}`,
+      id: transactionId,
       type: "purchase",
       amountGBP: -price,
       currency: "GBP",
       description: `${platform} ${service} — ${packageName}`,
       status: "completed",
-      createdAt: new Date(),
+      invoiceNumber: order.invoiceNumber,
+      invoiceIssuedAt: order.invoiceIssuedAt,
+      emailStatus: "pending",
+      createdAt: now,
     });
 
     await user.save();
 
-    try {
-      await sendOrderConfirmationEmail(
-        { email: user.email, name: user.name },
-        order
-      );
-    } catch {
-      // Email failure should not block order
-    }
+    const delivery = await sendOrderConfirmationEmail(
+      { email: user.email, name: `${user.name} ${user.surname}`.trim(), address: user.address },
+      order
+    );
+    await User.updateOne(
+      { _id: user._id, "orders.id": order.id },
+      { $set: { "orders.$.emailStatus": delivery.sent ? "sent" : "failed", "orders.$.emailId": delivery.id } }
+    );
+    await User.updateOne(
+      { _id: user._id, "transactions.id": transactionId },
+      { $set: { "transactions.$.emailStatus": delivery.sent ? "sent" : "failed", "transactions.$.emailId": delivery.id } }
+    );
 
     return NextResponse.json({
       success: true,

@@ -88,7 +88,7 @@ export default function ProductPage({ product }: { product: ProductConfig }) {
                   description={product.description}
                 />
                 <div className="mt-6 rounded-2xl border border-sky-100 bg-sky-50/80 p-4 text-sm leading-6 text-sky-950 sm:rounded-3xl sm:p-5">
-                  Prices are displayed for planning. Checkout and provisioning can be connected in the next backend phase.
+                  Buy this product in EUR, GBP or USD. Your selected checkout currency is reflected on the Invoice / Receipt.
                 </div>
               </div>
             </Reveal>
@@ -142,7 +142,7 @@ export default function ProductPage({ product }: { product: ProductConfig }) {
                   align="left"
                   eyebrow="Pricing"
                   title="Currency-aware planning prices"
-                  description="Use the switcher to view the same EUR-base prices in multiple display currencies."
+                  description="Choose EUR, GBP or USD for product pricing, checkout and your Invoice / Receipt."
                 />
               </Reveal>
               <div className="mt-8">

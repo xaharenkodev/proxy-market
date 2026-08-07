@@ -20,7 +20,7 @@ export default function PricingPage() {
                 align="left"
                 eyebrow="Pricing"
                 title="Premium proxy pricing with multi-currency planning"
-                description="Compare every proxy category in EUR, USD, GBP, UAH or PLN. Prices are displayed for planning; checkout and provisioning can be connected in the next phase."
+                description="Compare every proxy category and buy in EUR, GBP or USD. The selected currency is used at checkout and on your Invoice / Receipt."
               />
             </Reveal>
             <Reveal delay={0.1}>
