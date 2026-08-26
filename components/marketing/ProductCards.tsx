@@ -11,8 +11,21 @@ import { formatCurrencyFromEUR } from "@/config/currency";
 import { useBalance } from "@/context/BalanceContext";
 import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerContainer";
 import { SupportedCurrency } from "@/config/site";
+import { billingModel } from "@/config/billing";
+import OneTimeBadge from "@/components/ui/OneTimeBadge";
+import OneTimeNotice from "@/components/ui/OneTimeNotice";
 
-function productPriceLabel(productId: string, fallback: string, currency: SupportedCurrency) {
+/** Cheapest single charge for this product, or null when it is not on sale yet. */
+function productOneTimeFrom(productId: string, currency: SupportedCurrency) {
+  const totals = pricingPlans
+    .filter((plan) => plan.productId === productId && plan.totalEUR)
+    .map((plan) => plan.totalEUR as number);
+  if (!totals.length) return null;
+  return formatCurrencyFromEUR(Math.min(...totals), currency);
+}
+
+/** Per-day / per-GB rates, kept as a secondary reference under the total. */
+function productRateLabel(productId: string, fallback: string, currency: SupportedCurrency) {
   const plans = pricingPlans.filter((plan) => plan.productId === productId && plan.amountEUR);
   if (!plans.length) return fallback;
   return plans.map((plan) => `${formatCurrencyFromEUR(plan.amountEUR || 0, currency)}${plan.unit}`).join(" / ");
@@ -25,6 +38,8 @@ export default function ProductCards() {
     <StaggerContainer className="grid gap-4 sm:gap-5 sm:grid-cols-2 xl:grid-cols-3">
       {products.map((product) => {
         const Icon = product.icon;
+        const oneTimeFrom = productOneTimeFrom(product.id, displayCurrency);
+        const rateLabel = productRateLabel(product.id, product.startingPriceLabel, displayCurrency);
         return (
           <StaggerItem key={product.id}>
             <motion.div
@@ -38,17 +53,24 @@ export default function ProductCards() {
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-slate-950 text-white shadow-lg shadow-sky-100 sm:h-14 sm:w-14 sm:rounded-2xl">
                     <Icon size={22} />
                   </div>
-                  <Badge variant={product.status === "coming-soon" ? "warning" : "info"}>
-                    {product.status === "coming-soon" ? "Coming Soon" : "Available"}
-                  </Badge>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <Badge variant={product.status === "coming-soon" ? "warning" : "info"}>
+                      {product.status === "coming-soon" ? "Coming Soon" : "Available"}
+                    </Badge>
+                    <OneTimeBadge />
+                  </div>
                 </div>
                 <h3 className="mt-5 text-lg font-bold text-slate-950 sm:mt-6 sm:text-xl">{product.name}</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-3">{product.description}</p>
                 <div className="mt-4 rounded-xl border border-slate-200 bg-white/75 p-3 sm:mt-5 sm:rounded-2xl sm:p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Starting at</p>
-                  <p className="mt-1 text-base font-bold text-sky-700 sm:text-lg">
-                    {productPriceLabel(product.id, product.startingPriceLabel, displayCurrency)}
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    {oneTimeFrom ? "One-time purchase from" : "Availability"}
                   </p>
+                  <p className="mt-1 text-base font-bold text-sky-700 sm:text-lg">
+                    {oneTimeFrom || product.startingPriceLabel}
+                  </p>
+                  {oneTimeFrom && <p className="mt-1 text-xs font-semibold text-slate-500">{rateLabel} equivalent</p>}
+                  <p className="mt-1.5 text-xs font-semibold text-emerald-700">{billingModel.priceHint}</p>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2 sm:mt-4">
                   {[
@@ -83,6 +105,9 @@ export default function ProductCards() {
           </StaggerItem>
         );
       })}
+      <div className="sm:col-span-2 xl:col-span-3">
+        <OneTimeNotice />
+      </div>
     </StaggerContainer>
   );
 }

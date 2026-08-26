@@ -31,9 +31,9 @@ export const faqItems: FAQItem[] = [
   },
   {
     category: "Billing",
-    question: "How does billing work?",
+    question: "How does billing work — is this a subscription?",
     answer:
-      "You top up your wallet and buy proxy services in EUR, GBP or USD. Your selected currency is used for checkout and your Invoice / Receipt; the final amount is shown before you confirm.",
+      "You top up your account balance, then pay for each package individually from that balance. Every purchase is a one-time payment: there is no subscription, no recurring billing, no automatic continuation and no automatic top-up. When a package ends or its traffic is used, you place a new order if you want to continue. You top up and buy in EUR, GBP or USD; your selected currency is used for checkout and your Invoice / Receipt, and the final amount is shown before you confirm.",
   },
   {
     category: "Billing",

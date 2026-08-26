@@ -6,6 +6,8 @@ import { pricingPlans } from "@/config/pricing";
 import { formatCurrencyFromEUR } from "@/config/currency";
 import { useBalance } from "@/context/BalanceContext";
 import CurrencySwitcher from "./CurrencySwitcher";
+import OneTimeNotice from "@/components/ui/OneTimeNotice";
+import { accessLabel } from "@/config/billing";
 
 export default function PricingComparison() {
   const { displayCurrency } = useBalance();
@@ -20,7 +22,8 @@ export default function PricingComparison() {
         <thead>
           <tr>
             <Th>Plan</Th>
-            <Th>Price</Th>
+            <Th>One-time price</Th>
+            <Th>Billing</Th>
             <Th>Best for</Th>
             <Th>Protocol</Th>
             <Th>Rotation</Th>
@@ -33,10 +36,23 @@ export default function PricingComparison() {
               <Td><span className="font-bold text-slate-950 whitespace-nowrap">{plan.name}</span></Td>
               <Td>
                 {plan.amountEUR ? (
-                  <span className="font-bold text-slate-950 whitespace-nowrap">{formatCurrencyFromEUR(plan.amountEUR, displayCurrency)} {plan.unit}</span>
+                  <div>
+                    <span className="block font-bold text-slate-950 whitespace-nowrap">
+                      {formatCurrencyFromEUR(plan.totalEUR ?? plan.amountEUR, displayCurrency)}
+                      {plan.totalEUR ? " one-time" : ` ${plan.unit}`}
+                    </span>
+                    {plan.totalEUR ? (
+                      <span className="block text-xs text-slate-500 whitespace-nowrap">
+                        {accessLabel(plan.accessDays, plan.packageGb)} · {formatCurrencyFromEUR(plan.amountEUR, displayCurrency)}{plan.unit}
+                      </span>
+                    ) : null}
+                  </div>
                 ) : (
                   <Badge variant="warning">Coming Soon</Badge>
                 )}
+              </Td>
+              <Td>
+                <span className="whitespace-nowrap font-semibold text-emerald-700">One-time · no auto-renewal</span>
               </Td>
               <Td>{plan.bestFor}</Td>
               <Td>{plan.protocol}</Td>
@@ -46,6 +62,7 @@ export default function PricingComparison() {
           ))}
         </tbody>
       </TableShell>
+      <OneTimeNotice className="mt-5" />
     </div>
   );
 }

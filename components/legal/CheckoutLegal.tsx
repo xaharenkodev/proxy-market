@@ -1,6 +1,7 @@
 import Link from "next/link";
 import PaymentMethods from "@/components/ui/PaymentMethods";
 import { siteConfig } from "@/config/site";
+import OneTimeNotice from "@/components/ui/OneTimeNotice";
 
 const policies = [
   { href: "/terms", label: "Terms & Conditions" },
@@ -35,10 +36,13 @@ export default function CheckoutLegal({ className = "" }: { className?: string }
         <PaymentMethods variant="checkout" className="shrink-0" />
       </div>
 
-      <p className="mt-5 border-t border-slate-100 pt-4 text-xs leading-6 text-slate-500">
-        You can buy in EUR, GBP or USD. The final amount payable, including any applicable taxes,
-        is shown before you confirm. Proxy access is a digital service delivered on activation — see the digital delivery
-        and refund policies below for how cancellation rights apply.
+      <OneTimeNotice variant="checkout" className="mt-5" />
+
+      <p className="mt-4 border-t border-slate-100 pt-4 text-xs leading-6 text-slate-500">
+        You can buy in EUR, GBP or USD. The final amount payable, including any applicable taxes, is shown before you
+        confirm, and it is charged a single time. Proxy access is a digital service delivered on activation and expires
+        at the end of the purchased access period or prepaid traffic without renewing — see the digital delivery and
+        refund policies below for how cancellation rights apply.
       </p>
 
       <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2">

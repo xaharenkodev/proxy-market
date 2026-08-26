@@ -19,8 +19,8 @@ export default function PricingPage() {
               <SectionHeader
                 align="left"
                 eyebrow="Pricing"
-                title="Premium proxy pricing with multi-currency planning"
-                description="Compare every proxy category and buy in EUR, GBP or USD. The selected currency is used at checkout and on your Invoice / Receipt."
+                title="One-time proxy pricing, no subscriptions"
+                description="Every plan is a one-time purchase: you pay once, access runs for the period or traffic you bought, and nothing renews automatically. Compare every proxy category and buy in EUR, GBP or USD — the selected currency is used at checkout and on your Invoice / Receipt."
               />
             </Reveal>
             <Reveal delay={0.1}>
@@ -33,7 +33,7 @@ export default function PricingPage() {
       <section className="py-16 lg:py-24">
         <Container>
           <Reveal>
-            <SectionHeader eyebrow="Plans" title="Compare all pricing plans" description="Available proxies and coming-soon APIs arranged in a complete grid." />
+            <SectionHeader eyebrow="Plans" title="Compare all one-time plans" description="Available proxies and coming-soon APIs arranged in a complete grid. All prices are single payments — there are no recurring charges." />
           </Reveal>
           <div className="mt-10">
             <InteractivePricing />

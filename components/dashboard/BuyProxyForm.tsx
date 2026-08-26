@@ -14,6 +14,9 @@ import { locations, getCitiesForCountry, getCarriersForCountry, getLocationByCou
 import { packageTemplates } from "@/config/packages";
 import { formatCurrencyFromEUR } from "@/config/currency";
 import { useBalance } from "@/context/BalanceContext";
+import OneTimeBadge from "@/components/ui/OneTimeBadge";
+import OneTimeNotice from "@/components/ui/OneTimeNotice";
+import { billingModel } from "@/config/billing";
 import { useAuth } from "@/context/AuthContext";
 import { calculateProxyPrice, getDefaultDurationQuantity, ProxyDuration } from "@/src/lib/pricing";
 
@@ -153,6 +156,9 @@ export default function BuyProxyForm() {
           Your <strong>{submittedKind}</strong> order <strong>{submittedId}</strong> has been paid from your balance.
           Our team will review the details and set up your proxies. You will be contacted shortly.
         </p>
+        <p className="mt-2 text-sm font-semibold text-emerald-700">
+          {billingModel.checkoutNotice}
+        </p>
         <div className="mt-4 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm text-sky-950">
           Payment was deducted from your account balance. Proxy setup is reviewed manually by our team.
         </div>
@@ -241,7 +247,7 @@ export default function BuyProxyForm() {
                 Packages for {pkgCountry}{cityLabel ? `, ${cityLabel}` : ""}
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                {availableTemplates.length} package{availableTemplates.length !== 1 ? "s" : ""} available. Payment is deducted from your balance.
+                {availableTemplates.length} package{availableTemplates.length !== 1 ? "s" : ""} available. Each package is a single, one-time payment deducted from your balance.
               </p>
             </div>
             <CurrencySwitcher compact />
@@ -256,18 +262,23 @@ export default function BuyProxyForm() {
                   {tpl.highlighted && <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-sky-400 via-cyan-300 to-indigo-500" />}
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="text-base font-bold text-slate-950 sm:text-lg">{tpl.name}</h3>
-                    {tpl.highlighted && <Badge variant="info">Popular</Badge>}
+                    <div className="flex shrink-0 flex-col items-end gap-1.5">
+                      {tpl.highlighted && <Badge variant="info">Popular</Badge>}
+                      <OneTimeBadge />
+                    </div>
                   </div>
                   <p className="mt-1.5 text-sm text-slate-600">{tpl.bestFor}</p>
                   <div className="mt-3">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-slate-950">{formatCurrencyFromEUR(tpl.unitPriceEUR, displayCurrency)}</span>
-                      <span className="text-sm font-semibold text-slate-500">{tpl.priceUnit}</span>
+                      <span className="text-3xl font-bold text-slate-950">{formatCurrencyFromEUR(tpl.priceEUR, displayCurrency)}</span>
+                      <span className="text-sm font-semibold text-slate-500">one-time</span>
                     </div>
                     <p className="mt-1 text-xs text-slate-500">
-                      Total: {formatCurrencyFromEUR(tpl.priceEUR, displayCurrency)}
-                      {tpl.durationDays ? ` for ${tpl.durationDays} days` : tpl.bandwidthGb ? ` for ${tpl.bandwidthGb} GB` : ""}
+                      {tpl.durationDays ? `${tpl.durationDays} days access` : tpl.bandwidthGb ? `${tpl.bandwidthGb} GB prepaid traffic` : "One-time access"}
+                      {" · "}
+                      {formatCurrencyFromEUR(tpl.unitPriceEUR, displayCurrency)}{tpl.priceUnit} equivalent
                     </p>
+                    <p className="mt-1 text-xs font-semibold text-emerald-700">{billingModel.priceHint}</p>
                   </div>
                   <div className="mt-3 flex flex-wrap gap-1.5">
                     {tpl.features.map((f) => (
@@ -295,6 +306,8 @@ export default function BuyProxyForm() {
             </div>
           )}
 
+          <OneTimeNotice variant="checkout" />
+
           <div className="rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm text-sky-950">
             <div className="flex gap-3">
               <ShieldCheck size={18} className="mt-0.5 shrink-0" />
@@ -312,7 +325,7 @@ export default function BuyProxyForm() {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <h2 className="text-xl font-bold text-slate-950 sm:text-2xl">Custom proxy setup</h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Configure your requirements. Payment is deducted from your balance.</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Configure your requirements. A single, one-time payment is deducted from your balance — no subscription is created.</p>
                 </div>
                 <CurrencySwitcher />
               </div>
@@ -344,7 +357,7 @@ export default function BuyProxyForm() {
                   ) : (
                     <Input label={duration === "daily" ? "Number of days" : duration === "weekly" ? "Number of weeks" : "Number of months"} type="number" min={1} value={durationQuantity} onChange={(e) => setDurationQuantity(e.target.value)} />
                   )}
-                  <Select label="Plan duration" value={duration} onChange={(e) => { const next = e.target.value as ProxyDuration; setDuration(next); setDurationQuantity(getDefaultDurationQuantity(next).toString()); }} options={[{ value: "daily", label: "Daily" }, { value: "weekly", label: "Weekly" }, { value: "monthly", label: "Monthly" }, { value: "pay-per-gb", label: "Pay-per-GB" }]} />
+                  <Select label="Access period (one-time)" value={duration} onChange={(e) => { const next = e.target.value as ProxyDuration; setDuration(next); setDurationQuantity(getDefaultDurationQuantity(next).toString()); }} options={[{ value: "daily", label: "Daily — one-time" }, { value: "weekly", label: "Weekly — one-time" }, { value: "monthly", label: "Monthly — one-time" }, { value: "pay-per-gb", label: "Prepaid traffic — one-time" }]} />
                   <Select label="Rotation type" value={rotation} onChange={(e) => setRotation(e.target.value)} options={[{ value: "rotating", label: "Rotating" }, { value: "sticky", label: "Sticky" }]} />
                 </div>
                 <div className="mt-5 grid gap-4 sm:mt-6 sm:grid-cols-2">
@@ -372,14 +385,15 @@ export default function BuyProxyForm() {
           <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-sky-100 sm:rounded-[2rem] sm:p-6 xl:sticky xl:top-24 xl:self-start">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-950 text-white"><CircleDollarSign size={22} /></div>
             <h2 className="mt-4 text-xl font-bold text-slate-950 sm:mt-5 sm:text-2xl">Order total</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">Paid from your account balance.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Charged once from your account balance. This order does not create a subscription.</p>
+            <OneTimeBadge long className="mt-3" />
             <div className="mt-5 rounded-2xl bg-[linear-gradient(135deg,#0f172a,#075985)] p-4 text-white sm:mt-6 sm:rounded-3xl sm:p-5">
-              <p className="text-sm text-sky-100">Total price</p>
+              <p className="text-sm text-sky-100">Total price — charged once</p>
               <p className="mt-1 text-3xl font-bold sm:text-4xl">{formatCurrencyFromEUR(estimatedPriceEUR, displayCurrency)}</p>
               <p className="mt-2 text-xs text-sky-100">EUR base: EUR {estimatedPriceEUR.toFixed(2)}</p>
             </div>
             <dl className="mt-5 space-y-2.5 text-sm sm:mt-6 sm:space-y-3">
-              {[["Product", selectedProduct.name], ["Location", city ? `${country}, ${city}` : country], ["Rotation", rotation], ["Duration", duration === "pay-per-gb" ? `${bandwidth} GB per proxy` : `${durationQuantity} ${duration === "daily" ? "day(s)" : duration === "weekly" ? "week(s)" : "month(s)"}`]].map(([label, value]) => (
+              {[["Product", selectedProduct.name], ["Location", city ? `${country}, ${city}` : country], ["Rotation", rotation], ["Access period", duration === "pay-per-gb" ? `${bandwidth} GB per proxy` : `${durationQuantity} ${duration === "daily" ? "day(s)" : duration === "weekly" ? "week(s)" : "month(s)"}`], [billingModel.billingTypeLabel, billingModel.billingTypeValue], [billingModel.autoRenewalLabel, billingModel.autoRenewalValue]].map(([label, value]) => (
                 <div key={label} className="flex justify-between gap-3 border-b border-slate-100 pb-2.5 sm:pb-3">
                   <dt className="text-slate-500">{label}</dt>
                   <dd className="min-w-0 truncate text-right font-bold text-slate-950">{value}</dd>
@@ -404,6 +418,7 @@ export default function BuyProxyForm() {
         </div>
       )}
 
+      <OneTimeNotice variant="checkout" />
       <CheckoutLegal />
     </div>
   );

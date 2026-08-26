@@ -8,6 +8,9 @@ import Badge from "@/components/ui/Badge";
 import { pricingPlans } from "@/config/pricing";
 import { products, ProductId } from "@/config/products";
 import { formatCurrencyFromEUR } from "@/config/currency";
+import { billingModel, accessLabel } from "@/config/billing";
+import OneTimeBadge from "@/components/ui/OneTimeBadge";
+import OneTimeNotice from "@/components/ui/OneTimeNotice";
 import { useBalance } from "@/context/BalanceContext";
 import CurrencySwitcher from "./CurrencySwitcher";
 
@@ -42,7 +45,11 @@ export default function PricingCards({
         {plans.map((plan) => {
           const product = products.find((item) => item.id === plan.productId);
           const href = product ? `/products/${product.slug}` : "/contact";
-          const price = plan.amountEUR ? formatCurrencyFromEUR(plan.amountEUR, displayCurrency) : plan.price;
+          const rate = plan.amountEUR ? formatCurrencyFromEUR(plan.amountEUR, displayCurrency) : plan.price;
+          // The headline figure is the amount actually charged once at checkout;
+          // the per-day / per-GB rate stays as a secondary reference only.
+          const price = plan.totalEUR ? formatCurrencyFromEUR(plan.totalEUR, displayCurrency) : rate;
+          const isPriced = Boolean(plan.totalEUR);
           return (
             <motion.div
               key={`${plan.productId}-${plan.name}`}
@@ -57,12 +64,30 @@ export default function PricingCards({
                   <h3 className="truncate text-lg font-bold text-slate-950">{plan.name}</h3>
                   <p className="mt-2 text-sm leading-6 text-slate-500">{plan.bestFor}</p>
                 </div>
-                {plan.highlighted && <Badge variant="info">Popular</Badge>}
-                {plan.status === "coming-soon" && <Badge variant="warning">Soon</Badge>}
+                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  {plan.highlighted && <Badge variant="info">Popular</Badge>}
+                  {plan.status === "coming-soon" && <Badge variant="warning">Soon</Badge>}
+                  <OneTimeBadge />
+                </div>
               </div>
-              <div className="mt-5 flex items-end gap-1 sm:mt-6">
-                <span className="text-3xl font-bold text-slate-950 sm:text-4xl">{price}</span>
-                <span className="pb-1 text-sm font-semibold text-slate-500">{plan.unit}</span>
+              <div className="mt-5 sm:mt-6">
+                <div className="flex items-end gap-1">
+                  <span className="text-3xl font-bold text-slate-950 sm:text-4xl">{price}</span>
+                  <span className="pb-1 text-sm font-semibold text-slate-500">
+                    {isPriced ? "one-time" : plan.unit}
+                  </span>
+                </div>
+                {isPriced ? (
+                  <>
+                    <p className="mt-1 text-sm font-semibold text-slate-600">
+                      {accessLabel(plan.accessDays, plan.packageGb)} · {rate}
+                      {plan.unit} equivalent
+                    </p>
+                    <p className="mt-1 text-xs font-semibold text-emerald-700">{billingModel.priceHint}</p>
+                  </>
+                ) : (
+                  <p className="mt-1 text-xs font-semibold text-emerald-700">{billingModel.priceHint}</p>
+                )}
               </div>
               <div className="mt-4 flex flex-wrap gap-2 sm:mt-5">
                 {[plan.protocol, plan.rotation, plan.bandwidth].map((item) => (
@@ -72,7 +97,7 @@ export default function PricingCards({
                 ))}
               </div>
               <ul className="mt-5 space-y-2 text-sm text-slate-600 sm:mt-6">
-                {["Dashboard configuration", "Country selection UI", "Usage planning view"].map((item) => (
+                {["No subscription — pay once per order", "Access ends automatically, nothing renews", "Country and protocol selected per order"].map((item) => (
                   <li key={item} className="flex items-center gap-2">
                     <CheckCircle2 size={15} className="shrink-0 text-emerald-500" />
                     <span>{item}</span>
@@ -116,6 +141,7 @@ export default function PricingCards({
           </motion.div>
         ))}
       </div>
+      <OneTimeNotice className="mt-5" />
     </div>
   );
 }

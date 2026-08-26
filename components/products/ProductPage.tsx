@@ -141,8 +141,8 @@ export default function ProductPage({ product }: { product: ProductConfig }) {
                 <SectionHeader
                   align="left"
                   eyebrow="Pricing"
-                  title="Currency-aware planning prices"
-                  description="Choose EUR, GBP or USD for product pricing, checkout and your Invoice / Receipt."
+                  title="One-time prices, no subscription"
+                  description="Every plan below is bought once: you pay a single amount, access runs for the purchased period or prepaid traffic, and nothing renews automatically. Choose EUR, GBP or USD for product pricing, checkout and your Invoice / Receipt."
                 />
               </Reveal>
               <div className="mt-8">
@@ -159,6 +159,8 @@ export default function ProductPage({ product }: { product: ProductConfig }) {
                     ["Rotation", product.rotationSupport],
                     ["Auth", product.authMethods.join(" + ")],
                     ["Status", isComingSoon ? "Waitlist" : "Integration-ready"],
+                    ["Billing", "One-time payment"],
+                    ["Auto-renewal", "No"],
                   ].map(([label, value]) => (
                     <div key={label} className="flex justify-between gap-3 border-b border-slate-100 pb-2.5 sm:pb-3">
                       <dt className="text-slate-500">{label}</dt>

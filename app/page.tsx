@@ -69,7 +69,7 @@ export default function Home() {
             <SectionHeader
               eyebrow="Proxy products"
               title="Complete proxy marketplace"
-              description="Each product card combines pricing, protocols, rotation, authentication and best-fit use cases."
+              description="Each product card combines one-time pricing, protocols, rotation, authentication and best-fit use cases. No product on this site is sold as a subscription."
             />
           </Reveal>
           <div className="mt-10">
@@ -84,8 +84,8 @@ export default function Home() {
           <Reveal>
             <SectionHeader
               eyebrow="Pricing"
-              title="Currency-aware proxy pricing"
-              description="Switch visible planning currency without changing backend wallet or payment behavior."
+              title="One-time proxy pricing"
+              description="Pay once per order — no subscription, no auto-renewal. Switch the visible currency without changing wallet or payment behavior."
             />
           </Reveal>
           <div className="mt-10">

@@ -90,6 +90,10 @@ export default function DashboardBalancePage() {
           {message && <p className="mt-3 text-sm font-semibold text-emerald-700 sm:mt-4"><CheckCircle2 className="mr-1 inline h-4 w-4" />{message}</p>}
           {error && <p className="mt-3 text-sm font-semibold text-red-600 sm:mt-4">{error}</p>}
           <Button className="mt-5 sm:mt-6" fullWidth onClick={handleTopUp} disabled={loading}>{loading ? "Redirecting..." : `Top up in ${displayCurrency}`}</Button>
+          <p className="mt-3 text-xs font-semibold text-emerald-700">
+            Single one-time top-up. No subscription is created and no recurring charge is scheduled — you decide when to
+            top up again.
+          </p>
         </div>
 
         <div className="min-w-0">
