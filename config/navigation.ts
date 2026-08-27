@@ -1,4 +1,4 @@
-import { CreditCard, HelpCircle, Home, ListOrdered, Server, Settings, ShoppingCart, Wallet } from "lucide-react";
+import { CreditCard, HelpCircle, Home, ListOrdered, Server, Settings, ShoppingCart } from "lucide-react";
 import { products } from "./products";
 import { useCases } from "./useCases";
 
@@ -24,7 +24,6 @@ export const dashboardNavigation = [
   { href: "/dashboard", label: "Overview", icon: Home },
   { href: "/dashboard/buy", label: "Buy Proxies", icon: ShoppingCart },
   { href: "/dashboard/proxies", label: "Active Proxies", icon: Server },
-  { href: "/dashboard/balance", label: "Balance", icon: Wallet },
   { href: "/dashboard/orders", label: "Orders", icon: ListOrdered },
   { href: "/dashboard/payments", label: "Payments", icon: CreditCard },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },

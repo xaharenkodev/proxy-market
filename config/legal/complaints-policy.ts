@@ -18,13 +18,13 @@ export const complaintsPolicy: LegalDoc = {
     {
       title: "Types of Complaint",
       blocks: [
-        { type: "p", text: "You may raise complaints about account access, technical delivery, service quality, Balance Top-Ups, incorrect Balance deductions, duplicate payments, invoices, withdrawal requests, an approved refund credited to Balance, support or policy enforcement." },
+        { type: "p", text: "You may raise complaints about account access, technical delivery, service quality, payments, incorrect charges, duplicate payments, invoices, refunds, support or policy enforcement." },
       ],
     },
     {
       title: "Review Process",
       blocks: [
-        { type: "p", text: "We will acknowledge and review a complaint within a commercially reasonable time. We may request records, logs, screenshots, verification or clarification. We may provide an explanation, technical remedy, replacement access, correction, Balance adjustment or another appropriate outcome." },
+        { type: "p", text: "We will acknowledge and review a complaint within a commercially reasonable time. We may request records, logs, screenshots, verification or clarification. We may provide an explanation, technical remedy, replacement access, correction, refund or another appropriate outcome." },
       ],
     },
     {

@@ -5,14 +5,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, LogOut, Menu, User, Wallet, X } from "lucide-react";
+import { ChevronDown, LogOut, Menu, User, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Container from "./Container";
 import CurrencySwitcher from "@/components/marketing/CurrencySwitcher";
 import { siteConfig } from "@/config/site";
 import { headerNavigation, productNavigation } from "@/config/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { useBalance } from "@/context/BalanceContext";
 
 export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -20,7 +19,6 @@ export default function Header() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const { isLoggedIn, logout } = useAuth();
-  const { formattedBalance } = useBalance();
 
   useEffect(() => {
     window.setTimeout(() => {
@@ -130,10 +128,6 @@ export default function Header() {
               <div className="mx-0.5 h-6 w-px bg-slate-200" />
               {isLoggedIn ? (
                 <>
-                  <Link href="/dashboard" className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-900">
-                    <Wallet size={16} className="text-sky-600" />
-                    {formattedBalance}
-                  </Link>
                   <Link href="/dashboard">
                     <Button size="sm" variant="outline">
                       <User size={15} />

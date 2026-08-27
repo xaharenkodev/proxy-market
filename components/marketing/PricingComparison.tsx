@@ -4,13 +4,13 @@ import Badge from "@/components/ui/Badge";
 import { TableShell, Td, Th } from "@/components/ui/Table";
 import { pricingPlans } from "@/config/pricing";
 import { formatCurrencyFromEUR } from "@/config/currency";
-import { useBalance } from "@/context/BalanceContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import CurrencySwitcher from "./CurrencySwitcher";
 import OneTimeNotice from "@/components/ui/OneTimeNotice";
 import { accessLabel } from "@/config/billing";
 
 export default function PricingComparison() {
-  const { displayCurrency } = useBalance();
+  const { displayCurrency } = useCurrency();
 
   return (
     <div>

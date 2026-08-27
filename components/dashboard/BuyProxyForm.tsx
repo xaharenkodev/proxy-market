@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, CircleDollarSign, Fingerprint, Globe2, LockKeyhole, MapPin, Network, Package, Server, Settings2, ShieldCheck, Wallet } from "lucide-react";
+import { ArrowRight, CheckCircle2, CircleDollarSign, CreditCard, Fingerprint, Globe2, LockKeyhole, MapPin, Network, Package, Server, Settings2, ShieldCheck } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Input from "@/components/ui/Input";
@@ -12,24 +12,25 @@ import CheckoutLegal from "@/components/legal/CheckoutLegal";
 import { availableProducts } from "@/config/products";
 import { locations, getCitiesForCountry, getCarriersForCountry, getLocationByCountry } from "@/config/locations";
 import { packageTemplates } from "@/config/packages";
-import { formatCurrencyFromEUR } from "@/config/currency";
-import { useBalance } from "@/context/BalanceContext";
+import { formatAmount, formatCurrencyFromEUR } from "@/config/currency";
+import { useCurrency } from "@/context/CurrencyContext";
 import OneTimeBadge from "@/components/ui/OneTimeBadge";
 import OneTimeNotice from "@/components/ui/OneTimeNotice";
 import { billingModel } from "@/config/billing";
+import { siteConfig } from "@/config/site";
+import { completePendingOrder, oneTimeChargeAmount, readPendingOrder, savePendingOrder } from "@/config/checkout";
 import { useAuth } from "@/context/AuthContext";
 import { calculateProxyPrice, getDefaultDurationQuantity, ProxyDuration } from "@/src/lib/pricing";
 
 type Tab = "packages" | "custom";
 
 export default function BuyProxyForm() {
-  const { displayCurrency, formattedBalance } = useBalance();
+  const { displayCurrency } = useCurrency();
   const { user, updateUser } = useAuth();
   const [tab, setTab] = useState<Tab>("packages");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [insufficientBalance, setInsufficientBalance] = useState(false);
   const [success, setSuccess] = useState(false);
   const [submittedId, setSubmittedId] = useState("");
   const [submittedKind, setSubmittedKind] = useState("");
@@ -86,64 +87,112 @@ export default function BuyProxyForm() {
     setPkgCarrier("");
   };
 
-  const handleApiResponse = async (res: Response) => {
-    const data = await res.json();
-    if (data.success) {
-      updateUser(data.user);
-      setSubmittedId(data.proxyRequest.id);
-      setInsufficientBalance(false);
-      return data;
-    }
-    if (data.insufficientBalance) setInsufficientBalance(true);
-    setError(data.error || "Failed to submit request.");
-    return null;
-  };
+  const finishOrder = useCallback(
+    async (userId: string) => {
+      const result = await completePendingOrder(userId, displayCurrency);
+      if (!result) return false;
+      if (!result.ok) { setError(result.error); return false; }
+      updateUser(result.order.user as never);
+      setSubmittedId(result.order.id);
+      setSubmittedKind(result.order.label);
+      setSuccess(true);
+      return true;
+    },
+    [displayCurrency, updateUser]
+  );
 
-  const handlePackageRequest = async (templateId: string) => {
+  // A payment that was confirmed while the customer was away still owes them
+  // their order, so finish it as soon as they are back on this page.
+  useEffect(() => {
     if (!user) return;
+    const pending = readPendingOrder();
+    if (!pending?.attemptId) return;
+    let active = true;
+    (async () => {
+      try {
+        const response = await fetch(`/api/payments/ezzygate/status?attempt=${encodeURIComponent(pending.attemptId!)}&userId=${encodeURIComponent(user._id)}`);
+        const data = await response.json();
+        if (!active || !data.success || data.status !== "approved") return;
+        await finishOrder(user._id);
+      } catch {}
+    })();
+    return () => { active = false; };
+  }, [finishOrder, user]);
+
+  /**
+   * One order, one payment. The exact price of this order is charged once at
+   * the hosted checkout, and the order itself is placed the moment that
+   * payment is confirmed.
+   */
+  const startCheckout = async (payload: Record<string, unknown>, label: string, priceEUR: number) => {
+    if (!user) return;
+    if (priceEUR <= 0) { setError("This configuration does not produce a valid price."); return; }
     setLoading(true);
     setError("");
-    setInsufficientBalance(false);
+    const amount = oneTimeChargeAmount(priceEUR, displayCurrency);
+    savePendingOrder({ amount, currency: displayCurrency, label, payload });
     try {
-      const res = await fetch("/api/proxy-requests/create", {
+      const endpoint = siteConfig.testMode ? "/api/user/top-up" : "/api/payments/ezzygate/process";
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user._id, requestKind: "ready-package", packageId: templateId,
-          country: pkgCountry, city: pkgCity || undefined, carrier: pkgCarrier || undefined,
-          displayCurrency,
-        }),
+        body: JSON.stringify({ userId: user._id, amount, currency: displayCurrency, currencyIso: displayCurrency }),
       });
-      const data = await handleApiResponse(res);
-      if (data) {
-        setSubmittedKind(data.proxyRequest.packageName || "Ready package");
-        setSuccess(true);
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        setError(data.error || "The payment could not be started.");
+        return;
       }
-    } catch { setError("Something went wrong. Please try again."); }
-    finally { setLoading(false); }
+      if (data.paymentUrl) {
+        savePendingOrder({ attemptId: data.attemptId, amount, currency: displayCurrency, label, payload });
+        window.location.assign(data.paymentUrl);
+        return;
+      }
+      if (siteConfig.testMode && data.user) {
+        updateUser(data.user);
+        await finishOrder(user._id);
+        return;
+      }
+      setError("Payment provider did not return a checkout URL.");
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleCustomSubmit = async () => {
-    if (!user) return;
-    setLoading(true);
-    setError("");
-    setInsufficientBalance(false);
-    try {
-      const res = await fetch("/api/proxy-requests/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user._id, requestKind: "custom", proxyType: productId, country,
-          city: city || undefined, carrier: carrier || undefined, protocol, rotation,
-          authMethod, quantity: Number(quantity) || 1, bandwidthGb: Number(bandwidth) || 1,
-          duration, durationQuantity: Number(durationQuantity) || 1, displayCurrency,
-        }),
-      });
-      const data = await handleApiResponse(res);
-      if (data) { setSubmittedKind("Custom setup"); setSuccess(true); }
-    } catch { setError("Something went wrong. Please try again."); }
-    finally { setLoading(false); }
-  };
+  const handlePackageRequest = (templateId: string, priceEUR: number) =>
+    startCheckout(
+      {
+        requestKind: "ready-package",
+        packageId: templateId,
+        country: pkgCountry,
+        city: pkgCity || undefined,
+        carrier: pkgCarrier || undefined,
+      },
+      "Ready package",
+      priceEUR
+    );
+
+  const handleCustomSubmit = () =>
+    startCheckout(
+      {
+        requestKind: "custom",
+        proxyType: productId,
+        country,
+        city: city || undefined,
+        carrier: carrier || undefined,
+        protocol,
+        rotation,
+        authMethod,
+        quantity: Number(quantity) || 1,
+        bandwidthGb: Number(bandwidth) || 1,
+        duration,
+        durationQuantity: Number(durationQuantity) || 1,
+      },
+      "Custom setup",
+      estimatedPriceEUR
+    );
 
   if (success) {
     return (
@@ -153,14 +202,14 @@ export default function BuyProxyForm() {
         </div>
         <h2 className="mt-5 text-2xl font-bold text-slate-950">Order confirmed</h2>
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          Your <strong>{submittedKind}</strong> order <strong>{submittedId}</strong> has been paid from your balance.
-          Our team will review the details and set up your proxies. You will be contacted shortly.
+          Your <strong>{submittedKind}</strong> order <strong>{submittedId}</strong> has been paid with a single
+          one-time payment. Our team will review the details and set up your proxies. You will be contacted shortly.
         </p>
         <p className="mt-2 text-sm font-semibold text-emerald-700">
           {billingModel.checkoutNotice}
         </p>
         <div className="mt-4 rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm text-sky-950">
-          Payment was deducted from your account balance. Proxy setup is reviewed manually by our team.
+          You were charged once for this order only. Proxy setup is reviewed manually by our team.
         </div>
         <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
           <Link href="/dashboard/orders"><Button variant="outline">View your orders <ArrowRight size={16} /></Button></Link>
@@ -171,13 +220,8 @@ export default function BuyProxyForm() {
   }
 
   const errorBlock = error && (
-    <div className={`rounded-xl border p-4 text-sm ${insufficientBalance ? "border-amber-200 bg-amber-50 text-amber-950" : "border-red-200 bg-red-50 text-red-700"}`}>
+    <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
       <p className="font-semibold">{error}</p>
-      {insufficientBalance && (
-        <Link href="/dashboard/balance" className="mt-2 inline-flex items-center gap-1.5 font-bold text-sky-700">
-          <Wallet size={14} /> Top up balance <ArrowRight size={14} />
-        </Link>
-      )}
     </div>
   );
 
@@ -185,19 +229,18 @@ export default function BuyProxyForm() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex rounded-xl border border-slate-200 bg-white p-1 shadow-sm sm:inline-flex sm:rounded-2xl">
-          <button type="button" onClick={() => { setTab("packages"); setError(""); setInsufficientBalance(false); }}
+          <button type="button" onClick={() => { setTab("packages"); setError(""); }}
             className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold transition sm:flex-initial sm:rounded-xl sm:px-6 ${tab === "packages" ? "bg-slate-950 text-white shadow-sm" : "text-slate-600 hover:text-slate-950"}`}>
             <Package size={16} /> Ready packages
           </button>
-          <button type="button" onClick={() => { setTab("custom"); setError(""); setInsufficientBalance(false); }}
+          <button type="button" onClick={() => { setTab("custom"); setError(""); }}
             className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold transition sm:flex-initial sm:rounded-xl sm:px-6 ${tab === "custom" ? "bg-slate-950 text-white shadow-sm" : "text-slate-600 hover:text-slate-950"}`}>
             <Settings2 size={16} /> Custom setup
           </button>
         </div>
-        <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm">
-          <Wallet size={16} className="text-sky-600" />
-          <span className="text-slate-500">Balance:</span>
-          <span className="font-bold text-slate-950">{formattedBalance}</span>
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm">
+          <CreditCard size={16} className="text-emerald-600" />
+          <span className="font-bold text-emerald-800">Pay per order — one-time payment</span>
         </div>
       </div>
 
@@ -247,7 +290,7 @@ export default function BuyProxyForm() {
                 Packages for {pkgCountry}{cityLabel ? `, ${cityLabel}` : ""}
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                {availableTemplates.length} package{availableTemplates.length !== 1 ? "s" : ""} available. Each package is a single, one-time payment deducted from your balance.
+                {availableTemplates.length} package{availableTemplates.length !== 1 ? "s" : ""} available. Each package is bought on its own and paid for with a single one-time payment at checkout.
               </p>
             </div>
             <CurrencySwitcher compact />
@@ -270,7 +313,7 @@ export default function BuyProxyForm() {
                   <p className="mt-1.5 text-sm text-slate-600">{tpl.bestFor}</p>
                   <div className="mt-3">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-3xl font-bold text-slate-950">{formatCurrencyFromEUR(tpl.priceEUR, displayCurrency)}</span>
+                      <span className="text-3xl font-bold text-slate-950">{formatAmount(oneTimeChargeAmount(tpl.priceEUR, displayCurrency), displayCurrency)}</span>
                       <span className="text-sm font-semibold text-slate-500">one-time</span>
                     </div>
                     <p className="mt-1 text-xs text-slate-500">
@@ -292,8 +335,8 @@ export default function BuyProxyForm() {
                   </div>
                   <div className="mt-auto pt-4">
                     <Button fullWidth size="sm" variant={tpl.highlighted ? "primary" : "outline"}
-                      onClick={() => handlePackageRequest(tpl.id)} disabled={loading || !user}>
-                      {loading ? "Processing..." : "Pay from balance"}
+                      onClick={() => handlePackageRequest(tpl.id, tpl.priceEUR)} disabled={loading || !user}>
+                      {loading ? "Redirecting..." : `Pay ${formatAmount(oneTimeChargeAmount(tpl.priceEUR, displayCurrency), displayCurrency)} once`}
                       <ArrowRight size={14} />
                     </Button>
                   </div>
@@ -311,7 +354,7 @@ export default function BuyProxyForm() {
           <div className="rounded-xl border border-sky-100 bg-sky-50 p-4 text-sm text-sky-950">
             <div className="flex gap-3">
               <ShieldCheck size={18} className="mt-0.5 shrink-0" />
-              <span>Payment is deducted from your account balance. Our team reviews the order and sets up your proxies manually.</span>
+              <span>You pay for this one order at checkout in {displayCurrency}. Our team reviews the order and sets up your proxies manually.</span>
             </div>
           </div>
         </div>
@@ -325,7 +368,7 @@ export default function BuyProxyForm() {
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <h2 className="text-xl font-bold text-slate-950 sm:text-2xl">Custom proxy setup</h2>
-                  <p className="mt-1 text-sm leading-6 text-slate-600">Configure your requirements. A single, one-time payment is deducted from your balance — no subscription is created.</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">Configure your requirements and pay once at checkout — one payment for this order, no subscription, no auto-renewal.</p>
                 </div>
                 <CurrencySwitcher />
               </div>
@@ -385,11 +428,11 @@ export default function BuyProxyForm() {
           <aside className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-sky-100 sm:rounded-[2rem] sm:p-6 xl:sticky xl:top-24 xl:self-start">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-950 text-white"><CircleDollarSign size={22} /></div>
             <h2 className="mt-4 text-xl font-bold text-slate-950 sm:mt-5 sm:text-2xl">Order total</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">Charged once from your account balance. This order does not create a subscription.</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Charged once at checkout for this order only. No subscription is created.</p>
             <OneTimeBadge long className="mt-3" />
             <div className="mt-5 rounded-2xl bg-[linear-gradient(135deg,#0f172a,#075985)] p-4 text-white sm:mt-6 sm:rounded-3xl sm:p-5">
               <p className="text-sm text-sky-100">Total price — charged once</p>
-              <p className="mt-1 text-3xl font-bold sm:text-4xl">{formatCurrencyFromEUR(estimatedPriceEUR, displayCurrency)}</p>
+              <p className="mt-1 text-3xl font-bold sm:text-4xl">{formatAmount(oneTimeChargeAmount(estimatedPriceEUR, displayCurrency), displayCurrency)}</p>
               <p className="mt-2 text-xs text-sky-100">EUR base: EUR {estimatedPriceEUR.toFixed(2)}</p>
             </div>
             <dl className="mt-5 space-y-2.5 text-sm sm:mt-6 sm:space-y-3">
@@ -401,7 +444,7 @@ export default function BuyProxyForm() {
               ))}
             </dl>
             <div className="mt-5 rounded-2xl border border-sky-100 bg-sky-50 p-3 text-sm leading-6 text-sky-950 sm:mt-6 sm:rounded-3xl sm:p-4">
-              <div className="flex gap-3"><ShieldCheck size={18} className="mt-0.5 shrink-0" /><span>Payment is deducted from your balance. Proxy setup is reviewed manually by our team.</span></div>
+              <div className="flex gap-3"><ShieldCheck size={18} className="mt-0.5 shrink-0" /><span>You are charged once for this order at checkout. Proxy setup is reviewed manually by our team.</span></div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2 sm:mt-5">
               {[Fingerprint, CheckCircle2].map((Icon, index) => (
@@ -412,7 +455,7 @@ export default function BuyProxyForm() {
               ))}
             </div>
             <Button className="mt-4 sm:mt-5" fullWidth onClick={handleCustomSubmit} disabled={loading || !user}>
-              {loading ? "Processing..." : "Pay from balance"}
+              {loading ? "Redirecting..." : `Pay ${formatAmount(oneTimeChargeAmount(estimatedPriceEUR, displayCurrency), displayCurrency)} once`}
             </Button>
           </aside>
         </div>

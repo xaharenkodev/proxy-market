@@ -11,7 +11,7 @@ import { formatCurrencyFromEUR } from "@/config/currency";
 import { billingModel, accessLabel } from "@/config/billing";
 import OneTimeBadge from "@/components/ui/OneTimeBadge";
 import OneTimeNotice from "@/components/ui/OneTimeNotice";
-import { useBalance } from "@/context/BalanceContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import CurrencySwitcher from "./CurrencySwitcher";
 
 export default function PricingCards({
@@ -23,7 +23,7 @@ export default function PricingCards({
   productId?: ProductId;
   showSwitcher?: boolean;
 }) {
-  const { displayCurrency } = useBalance();
+  const { displayCurrency } = useCurrency();
   const filtered = productId ? pricingPlans.filter((plan) => plan.productId === productId) : pricingPlans;
   const plans = limit ? filtered.slice(0, limit) : filtered;
 

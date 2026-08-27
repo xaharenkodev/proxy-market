@@ -57,7 +57,7 @@ export default function SignInPage() {
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-sky-100 sm:rounded-[2rem] sm:p-6">
             <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Login to Virenza Proxy</h1>
             <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-3">
-              Access your balance, proxy configuration, order history and support tools.
+              Access your proxy configuration, order history, invoices and support tools.
             </p>
             <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-8">
               <Input label="Email" type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(""); }} />

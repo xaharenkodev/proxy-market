@@ -1,16 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { Activity, ClipboardList, Server, ShieldCheck, ShoppingCart, Wallet } from "lucide-react";
+import { Activity, ClipboardList, CreditCard, Server, ShieldCheck, ShoppingCart } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import StatCard from "@/components/dashboard/StatCard";
 import EmptyState from "@/components/dashboard/EmptyState";
 import { TableShell, Td, Th } from "@/components/ui/Table";
-import { useBalance } from "@/context/BalanceContext";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function DashboardPage() {
-  const { formattedBalance, proxyRequests } = useBalance();
+  const { proxyRequests } = useCurrency();
   const pendingRequests = proxyRequests.filter((r) => r.status === "requested" || r.status === "reviewing").length;
 
   return (
@@ -18,16 +18,15 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Dashboard overview</h1>
-          <p className="mt-1.5 text-sm text-slate-600 sm:mt-2">Manage balance, proxy requests and account settings.</p>
+          <p className="mt-1.5 text-sm text-slate-600 sm:mt-2">Manage your proxy orders and account settings. Every order is paid for individually.</p>
         </div>
         <div className="flex gap-3">
           <Link href="/dashboard/buy"><Button size="sm"><ShoppingCart size={16} />New request</Button></Link>
-          <Link href="/dashboard/balance"><Button size="sm" variant="outline">Add balance</Button></Link>
         </div>
       </div>
 
       <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
-        <StatCard icon={Wallet} label="Balance" value={formattedBalance} note="Wallet balance" />
+        <StatCard icon={CreditCard} label="Billing" value="One-time" note="One payment per order" />
         <StatCard icon={ClipboardList} label="Requests" value={proxyRequests.length.toString()} note="Total proxy requests" />
         <StatCard icon={Server} label="Pending" value={pendingRequests.toString()} note="Awaiting review" />
         <StatCard icon={Activity} label="Active" value="0" note="After setup confirmation" />

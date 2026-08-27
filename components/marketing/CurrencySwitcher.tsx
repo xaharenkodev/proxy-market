@@ -1,10 +1,10 @@
 "use client";
 
 import { siteConfig, SupportedCurrency } from "@/config/site";
-import { useBalance } from "@/context/BalanceContext";
+import { useCurrency } from "@/context/CurrencyContext";
 
 export default function CurrencySwitcher({ compact = false }: { compact?: boolean }) {
-  const { displayCurrency, setDisplayCurrency } = useBalance();
+  const { displayCurrency, setDisplayCurrency } = useCurrency();
 
   return (
     <div className={`inline-flex shrink-0 items-center rounded-xl border border-slate-200 bg-white/85 p-1 shadow-sm backdrop-blur sm:rounded-2xl ${compact ? "gap-0" : "gap-0.5"}`}>

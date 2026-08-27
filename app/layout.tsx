@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { BalanceProvider } from "@/context/BalanceContext";
+import { CurrencyProvider } from "@/context/CurrencyContext";
 import { AuthProvider } from "@/context/AuthContext";
 import AppChrome from "@/components/layout/AppChrome";
 import { siteConfig } from "@/config/site";
@@ -44,9 +44,9 @@ export default function RootLayout({
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[#fafbfe] text-gray-900">
         <AuthProvider>
-          <BalanceProvider>
+          <CurrencyProvider>
             <AppChrome>{children}</AppChrome>
-          </BalanceProvider>
+          </CurrencyProvider>
         </AuthProvider>
       </body>
     </html>

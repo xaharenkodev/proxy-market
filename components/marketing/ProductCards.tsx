@@ -8,7 +8,7 @@ import Button from "@/components/ui/Button";
 import { products } from "@/config/products";
 import { pricingPlans } from "@/config/pricing";
 import { formatCurrencyFromEUR } from "@/config/currency";
-import { useBalance } from "@/context/BalanceContext";
+import { useCurrency } from "@/context/CurrencyContext";
 import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerContainer";
 import { SupportedCurrency } from "@/config/site";
 import { billingModel } from "@/config/billing";
@@ -32,7 +32,7 @@ function productRateLabel(productId: string, fallback: string, currency: Support
 }
 
 export default function ProductCards() {
-  const { displayCurrency } = useBalance();
+  const { displayCurrency } = useCurrency();
 
   return (
     <StaggerContainer className="grid gap-4 sm:gap-5 sm:grid-cols-2 xl:grid-cols-3">

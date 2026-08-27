@@ -95,7 +95,7 @@ function PaymentDeclineContent() {
           </div>
           <ul className="space-y-1.5 list-disc list-inside text-rose-900/80 leading-relaxed">
             <li>Incorrect card number, CVV code, or expiration date.</li>
-            <li>Insufficient balance or card daily spending limits.</li>
+            <li>Insufficient funds on the card or card daily spending limits.</li>
             <li>3D Secure (3DS) authentication was cancelled or timed out.</li>
             <li>International or online transactions restricted by your bank.</li>
           </ul>
@@ -103,13 +103,13 @@ function PaymentDeclineContent() {
 
         {/* Primary Try Again Action Button */}
         <div className="mt-6 sm:mt-8">
-          <Link href="/dashboard/balance" className="block">
+          <Link href="/dashboard/buy" className="block">
             <Button
               fullWidth
               className="group bg-rose-600 hover:bg-rose-700 text-white font-semibold py-3.5 shadow-lg shadow-rose-600/25"
             >
               <RefreshCw className="mr-2 inline h-4 w-4" />
-              Try Again / Change Payment Amount
+              Try Again / Change Your Order
               <ArrowRight className="ml-2 inline h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>

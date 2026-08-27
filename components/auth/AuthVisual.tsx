@@ -20,7 +20,7 @@ export default function AuthVisual() {
         </div>
         <div className="mt-6 grid gap-3 sm:mt-8 sm:gap-4">
           {[
-            { icon: Wallet, title: "Balance-based account", text: "Reuse the existing wallet flow safely." },
+            { icon: Wallet, title: "One-time purchases", text: "Pay for each order separately at checkout." },
             { icon: Globe2, title: "Global proxy UI", text: "Configure country, protocol and rotation." },
             { icon: ShieldCheck, title: "Compliance controls", text: "Clear acceptable-use guardrails." },
           ].map(({ icon: Icon, title, text }) => (

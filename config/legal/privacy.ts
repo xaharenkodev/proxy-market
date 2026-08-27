@@ -19,7 +19,7 @@ export const privacy: LegalDoc = {
     {
       title: "Purposes and Legal Bases",
       blocks: [
-        { type: "p", text: "We process data to provide the Service, maintain accounts, process Balance Top-Ups, enable package purchases, provide support, secure systems, prevent fraud and abuse, comply with legal obligations and protect or defend legal claims." },
+        { type: "p", text: "We process data to provide the Service, maintain accounts, process individual package payments, provide support, secure systems, prevent fraud and abuse, comply with legal obligations and protect or defend legal claims." },
         { type: "p", text: "Depending on the context, our legal bases include contract performance, legitimate interests, legal obligations, consent and the establishment, exercise or defence of legal claims." },
       ],
     },

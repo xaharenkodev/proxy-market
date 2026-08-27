@@ -18,7 +18,7 @@ export const deliveryPolicy: LegalDoc = {
     {
       title: "Purchase Flow",
       blocks: [
-        { type: "p", text: "The usual flow is: add funds to Balance; select a proxy package; confirm the individual purchase from Balance; receive digital access after successful provisioning. A Balance Top-Up alone does not purchase or deliver a proxy package." },
+        { type: "p", text: "The usual flow is: select a proxy package; confirm the individual order; pay for that one order at checkout; receive digital access after successful provisioning. Access is delivered only after that single payment is confirmed." },
       ],
     },
     {
@@ -36,7 +36,7 @@ export const deliveryPolicy: LegalDoc = {
     {
       title: "Access End and Replacement Purchase",
       blocks: [
-        { type: "p", text: "A package ends when its access period expires or its traffic allowance is used, as applicable. To continue using the Service, you must make a new individual purchase using Balance." },
+        { type: "p", text: "A package ends when its access period expires or its traffic allowance is used, as applicable. Nothing renews automatically. To continue using the Service, you must place a new individual order and pay for it separately." },
       ],
     },
     {

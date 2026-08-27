@@ -5,10 +5,11 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { TableShell, Td, Th } from "@/components/ui/Table";
 import EmptyState from "@/components/dashboard/EmptyState";
-import { useBalance } from "@/context/BalanceContext";
+import { useCurrency } from "@/context/CurrencyContext";
+import { formatCurrencyFromEUR } from "@/config/currency";
 
 export default function DashboardOrdersPage() {
-  const { proxyRequests } = useBalance();
+  const { proxyRequests, displayCurrency } = useCurrency();
 
   return (
     <div className="space-y-6">
@@ -30,7 +31,7 @@ export default function DashboardOrdersPage() {
               <Th>Product</Th>
               <Th>Location</Th>
               <Th>Config</Th>
-              <Th>Est. price</Th>
+              <Th>Paid once</Th>
               <Th>Status</Th>
               <Th>Date</Th>
             </tr>
@@ -51,7 +52,7 @@ export default function DashboardOrdersPage() {
                     {req.protocol} · {req.rotation} · {req.quantity}x · {req.bandwidthGb} GB
                   </span>
                 </Td>
-                <Td><span className="font-semibold">€{req.estimatedPriceEUR.toFixed(2)}</span></Td>
+                <Td><span className="font-semibold">{formatCurrencyFromEUR(req.estimatedPriceEUR, displayCurrency)}</span></Td>
                 <Td>
                   <Badge variant={req.status === "paid" || req.status === "confirmed" || req.status === "completed" ? "success" : req.status === "cancelled" ? "error" : "warning"}>
                     {req.status === "paid" ? "Paid · pending setup" : req.status}

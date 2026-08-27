@@ -47,7 +47,7 @@ export default function PremiumHero() {
             transition={{ duration: 0.55, delay: 0.18 }}
             className="mx-auto mt-6 max-w-3xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8"
           >
-            Configure datacenter, static ISP, residential and mobile proxy workflows with global locations, protocol controls, balance visibility and integration-ready provisioning states.
+            Configure datacenter, static ISP, residential and mobile proxy workflows with global locations, protocol controls, per-order one-time checkout and integration-ready provisioning states.
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 18 }}

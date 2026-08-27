@@ -105,7 +105,7 @@ export default function SignUpPage() {
           <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-sky-100 sm:rounded-[2rem] sm:p-6">
             <h1 className="text-2xl font-bold text-slate-950 sm:text-3xl">Create your Virenza Proxy account</h1>
             <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-3">
-              Access balance, orders and proxy management screens.
+              Access orders, invoices and proxy management screens.
             </p>
             <div className="mt-6 grid gap-3 sm:mt-8 sm:gap-4 sm:grid-cols-2">
               <Input label="First name" value={form.name} onChange={(e) => update("name", e.target.value)} />

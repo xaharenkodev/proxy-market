@@ -24,10 +24,10 @@ export const terms: LegalDoc = {
       ],
     },
     {
-      title: "Balance and One-Time Purchases",
+      title: "One-Time Purchases",
       blocks: [
-        { type: "p", text: "Before buying a proxy package, you must add funds to your account Balance using an available payment method. A Balance Top-Up and a service purchase are separate transactions." },
-        { type: "p", text: "Each proxy package is purchased individually using available Balance. The applicable amount is deducted once when you confirm the order. There are no automatic charges, automatic continuation or automatic Balance Top-Ups. When a package ends or its traffic allowance is used, a new purchase is required to continue using the Service." },
+        { type: "p", text: "Each proxy package is bought individually and paid for directly at checkout using an available payment method. We do not sell subscriptions and do not offer prepaid credit: your account is not a payment account or stored-value service and cannot be loaded with funds for later use." },
+        { type: "p", text: "The applicable amount is charged a single time when you confirm the order, and the order takes effect only once that payment is confirmed. There are no subscriptions, automatic charges, recurring billing or automatic continuation. When a package ends or its traffic allowance is used, a new, separately paid purchase is required to continue using the Service." },
         { type: "p", text: "Prices expressed per day or per GB are unit-pricing references. They do not create an ongoing payment obligation." },
       ],
     },

@@ -9,14 +9,12 @@ import Button from "@/components/ui/Button";
 import { dashboardNavigation } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
 import { useAuth } from "@/context/AuthContext";
-import { useBalance } from "@/context/BalanceContext";
 import GuestBlock from "@/components/ui/GuestBlock";
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { isLoggedIn, user, logout } = useAuth();
-  const { formattedBalance } = useBalance();
 
   useEffect(() => {
     window.setTimeout(() => setOpen(false), 0);
@@ -87,11 +85,13 @@ export default function DashboardShell({ children }: { children: React.ReactNode
           </div>
         </nav>
         <div className="border-t border-slate-200 p-4">
-          <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <p className="text-xs text-slate-500">Current balance</p>
-            <p className="mt-1 text-2xl font-bold text-slate-950">{formattedBalance}</p>
-            <Link href="/dashboard/balance" className="mt-3 block">
-              <Button fullWidth size="sm" variant="outline">Add balance</Button>
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+            <p className="text-xs font-bold text-emerald-800">One-time purchases only</p>
+            <p className="mt-1 text-xs leading-5 text-emerald-800">
+              Each order is paid once at checkout. No subscription, no auto-renewal, nothing to top up.
+            </p>
+            <Link href="/dashboard/buy" className="mt-3 block">
+              <Button fullWidth size="sm" variant="outline">Buy a package</Button>
             </Link>
           </div>
         </div>
@@ -104,7 +104,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
               <Menu size={20} />
             </button>
             <div className="hidden min-w-0 lg:block">
-              <p className="truncate text-sm text-slate-500">Configure proxies, manage your balance and track usage across your orders.</p>
+              <p className="truncate text-sm text-slate-500">Configure proxies, pay per order and track usage across your orders.</p>
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <div className="hidden text-right sm:block">

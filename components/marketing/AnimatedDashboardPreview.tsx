@@ -50,7 +50,7 @@ function OverviewContent() {
       </div>
       <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
         {[
-          { icon: Wallet, label: "Balance", value: "€128.40" },
+          { icon: Wallet, label: "Last order", value: "€128.40" },
           { icon: Server, label: "Active", value: "3" },
           { icon: Activity, label: "Traffic", value: "42 GB" },
           { icon: Globe2, label: "Locations", value: "18" },

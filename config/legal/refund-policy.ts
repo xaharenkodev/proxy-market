@@ -5,7 +5,7 @@ export const refundPolicy: LegalDoc = {
   title: "Refund & Cancellation Policy",
   updated: "August 26, 2026",
   intro: [
-    { type: "p", text: "This Policy explains requests concerning Balance Top-Ups and proxy packages." },
+    { type: "p", text: "This Policy explains refund and cancellation requests concerning individual proxy package purchases." },
     { type: "p", text: "This policy applies to the website, dashboard and services offered under the Virenza Proxy brand. The service provider is VIRENZA LTD, company number 17231719, of Dept 6814, 196 High Road, Wood Green, London, United Kingdom, N22 8HH (\"Virenza Proxy\", \"we\", \"us\" or \"our\"). You may contact us at info@virenzaproxy.com." },
   ],
   sections: [
@@ -31,13 +31,13 @@ export const refundPolicy: LegalDoc = {
     {
       title: "Approved Service Refunds",
       blocks: [
-        { type: "p", text: "Where we approve a refund or service remedy for a proxy package, the approved amount is credited to your Balance unless mandatory law requires another method. This is separate from a request to withdraw unused Balance." },
+        { type: "p", text: "Where we approve a refund or service remedy for a proxy package, the approved amount is returned to the original payment method used for that purchase, unless mandatory law requires another method." },
       ],
     },
     {
-      title: "Balance Top-Ups",
+      title: "Payment Errors and Duplicates",
       blocks: [
-        { type: "p", text: "A Balance Top-Up may be reviewed for error, duplication, fraud or non-delivery of funds. Unused Balance may be requested for withdrawal under the Payment, Billing & Taxes Policy. We may require identity, payment or account verification before processing a refund or withdrawal." },
+        { type: "p", text: "A payment may be reviewed for error, duplication or fraud. As every payment is collected for a specific order, there is no spendable credit on your account; where an amount cannot be applied to the order it was taken for, it is returned to the original payment method. We may require identity, payment or account verification before processing a refund." },
       ],
     },
     {

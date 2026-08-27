@@ -18,7 +18,7 @@ export const verificationPolicy: LegalDoc = {
     {
       title: "When Reviews Occur",
       blocks: [
-        { type: "p", text: "A review may occur at registration, before or after a Balance Top-Up or package purchase, before issuing credentials, after unusual traffic, after an abuse report, for high-volume or custom requests, or when a provider or payment processor raises a concern." },
+        { type: "p", text: "A review may occur at registration, before or after a package purchase, before issuing credentials, after unusual traffic, after an abuse report, for high-volume or custom requests, or when a provider or payment processor raises a concern." },
       ],
     },
     {

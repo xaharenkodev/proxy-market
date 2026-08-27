@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Fingerprint, Globe2, KeyRound, Layers3, LockKeyhole, Network, Wallet } from "lucide-react";
+import { BarChart3, CreditCard, Fingerprint, Globe2, KeyRound, Layers3, LockKeyhole, Network } from "lucide-react";
 import Container from "@/components/layout/Container";
 import Button from "@/components/ui/Button";
 import Accordion from "@/components/ui/Accordion";
@@ -39,7 +39,7 @@ const features = [
   { icon: KeyRound, title: "Username/password auth", text: "Rotate credentials from the dashboard without redeploying your tooling." },
   { icon: Globe2, title: "Country targeting", text: "Choose the exit country so region-gated content resolves as a local visitor sees it." },
   { icon: BarChart3, title: "Usage analytics", text: "Track bandwidth, requests and active sessions before a runaway job becomes an invoice." },
-  { icon: Wallet, title: "Balance management", text: "Top up and buy proxy services in EUR, GBP or USD with a single wallet." },
+  { icon: CreditCard, title: "Pay per order", text: "Buy each proxy package on its own in EUR, GBP or USD. One payment, no stored funds." },
 ];
 
 export default function Home() {
@@ -85,7 +85,7 @@ export default function Home() {
             <SectionHeader
               eyebrow="Pricing"
               title="One-time proxy pricing"
-              description="Pay once per order — no subscription, no auto-renewal. Switch the visible currency without changing wallet or payment behavior."
+              description="Pay once per order — no subscription, no auto-renewal, nothing to prepay. Choose the currency you are charged in at checkout."
             />
           </Reveal>
           <div className="mt-10">
