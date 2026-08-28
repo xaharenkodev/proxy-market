@@ -66,7 +66,7 @@ function PaymentSuccessContent() {
     checking: {
       icon: Clock3,
       title: "Confirming your payment",
-      text: "We are waiting for the verified payment confirmation from Ezzygate.",
+      text: "We are waiting for verified payment confirmation.",
       tone: "text-sky-600 bg-sky-50",
     },
     approved: {
@@ -78,7 +78,7 @@ function PaymentSuccessContent() {
     pending: {
       icon: Clock3,
       title: "Payment is still pending",
-      text: "The payment has not yet been confirmed by Ezzygate. Your order stays unpaid until it is. Please wait a few minutes before contacting support.",
+      text: "The payment has not yet been confirmed. Your order stays unpaid until it is. Please wait a few minutes before contacting support.",
       tone: "text-amber-600 bg-amber-50",
     },
     failed: {

@@ -132,11 +132,17 @@ export default function BuyProxyForm() {
     const amount = oneTimeChargeAmount(priceEUR, displayCurrency);
     savePendingOrder({ amount, currency: displayCurrency, label, payload });
     try {
-      const endpoint = siteConfig.testMode ? "/api/user/top-up" : "/api/payments/ezzygate/process";
-      const res = await fetch(endpoint, {
+      const res = await fetch("/api/payments/ezzygate/process", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user._id, amount, currency: displayCurrency, currencyIso: displayCurrency }),
+        body: JSON.stringify({
+          userId: user._id || "demo-user-1",
+          amount,
+          currency: displayCurrency,
+          currencyIso: displayCurrency,
+          client_email: user.email || "customer@virenzaproxy.com",
+          client_fullName: `${user.name || "Customer"} ${user.surname || ""}`.trim(),
+        }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -146,11 +152,6 @@ export default function BuyProxyForm() {
       if (data.paymentUrl) {
         savePendingOrder({ attemptId: data.attemptId, amount, currency: displayCurrency, label, payload });
         window.location.assign(data.paymentUrl);
-        return;
-      }
-      if (siteConfig.testMode && data.user) {
-        updateUser(data.user);
-        await finishOrder(user._id);
         return;
       }
       setError("Payment provider did not return a checkout URL.");
