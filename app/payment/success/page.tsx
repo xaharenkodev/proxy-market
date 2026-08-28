@@ -28,7 +28,8 @@ function PaymentSuccessContent() {
     let retries = 0;
     const check = async () => {
       try {
-        const response = await fetch(`/api/payments/ezzygate/status?attempt=${encodeURIComponent(attempt)}&userId=${encodeURIComponent(user._id)}`);
+        const queryStr = searchParams.toString();
+        const response = await fetch(`/api/payments/ezzygate/status?attempt=${encodeURIComponent(attempt)}&userId=${encodeURIComponent(user._id)}${queryStr ? `&${queryStr}` : ""}`);
         const data = await response.json();
         if (!active) return;
         if (data.success && data.status === "approved") {
