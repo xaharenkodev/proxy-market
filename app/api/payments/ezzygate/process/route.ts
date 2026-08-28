@@ -19,11 +19,11 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const amount = Number(body.amount);
-    const currency = String(body.currencyIso || "").toUpperCase() as CurrencyCode;
+    const currency = String(body.currencyIso || body.currency || "EUR").toUpperCase() as CurrencyCode;
     const userId = String(body.userId || "");
 
-    if (!mongoose.Types.ObjectId.isValid(userId)) {
-      return NextResponse.json({ success: false, error: "A valid account is required." }, { status: 400 });
+    if (!userId && !body.client_email) {
+      return NextResponse.json({ success: false, error: "A valid account or email is required." }, { status: 400 });
     }
     if (!SUPPORTED_CURRENCIES.has(currency)) {
       return NextResponse.json({ success: false, error: "Supported payment currencies are EUR, GBP and USD." }, { status: 400 });
@@ -32,24 +32,39 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: "Enter a valid payment amount." }, { status: 400 });
     }
 
-    await connectDB();
-    const user = await User.findById(userId);
-    if (!user) return NextResponse.json({ success: false, error: "User not found." }, { status: 404 });
-
     const attemptId = crypto.randomUUID();
     const roundedAmount = +amount.toFixed(2);
-    const paymentAttempt: IPaymentAttempt = {
-      id: attemptId,
-      amount: roundedAmount,
-      currency,
-      amountGBP: convertToGBP(roundedAmount, currency),
-      status: "pending",
-      invoiceNumber: invoiceNumber(attemptId),
-      emailStatus: "pending",
-      createdAt: new Date(),
-    };
-    user.paymentAttempts.unshift(paymentAttempt);
-    await user.save();
+    let clientEmail = body.client_email || "customer@virenzaproxy.com";
+    let clientFullName = body.client_fullName || "Customer";
+
+    let isDbConnected = false;
+    try {
+      await connectDB();
+      isDbConnected = true;
+    } catch (dbErr) {
+      console.warn("MongoDB connection unavailable for payment attempt:", dbErr);
+    }
+
+    if (isDbConnected && mongoose.Types.ObjectId.isValid(userId)) {
+      const user = await User.findById(userId);
+      if (user) {
+        clientEmail = user.email || clientEmail;
+        clientFullName = `${user.name} ${user.surname}`.trim() || clientFullName;
+
+        const paymentAttempt: IPaymentAttempt = {
+          id: attemptId,
+          amount: roundedAmount,
+          currency,
+          amountGBP: convertToGBP(roundedAmount, currency),
+          status: "pending",
+          invoiceNumber: invoiceNumber(attemptId),
+          emailStatus: "pending",
+          createdAt: new Date(),
+        };
+        user.paymentAttempts.unshift(paymentAttempt);
+        await user.save();
+      }
+    }
 
     const origin = new URL(request.url).origin;
     const urlRedirect = new URL("/payment/return", origin);
@@ -62,13 +77,13 @@ export async function POST(request: Request) {
       trans_currency: currency,
       trans_type: "0",
       trans_installments: "1",
-      client_email: user.email,
-      client_fullName: `${user.name} ${user.surname}`.trim(),
+      client_email: clientEmail,
+      client_fullName: clientFullName,
       url_redirect: urlRedirect.toString(),
       url_notify: urlNotify.toString(),
     });
 
-    logEzzygateEvent("request", { attemptId, amount: roundedAmount, currency });
+    logEzzygateEvent("request", { attemptId, amount: roundedAmount, currency, clientEmail });
     return NextResponse.json({ success: true, paymentUrl: result.paymentUrl, attemptId });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Payment initiation failed.";

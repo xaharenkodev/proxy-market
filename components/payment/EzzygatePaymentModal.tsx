@@ -56,7 +56,6 @@ export default function EzzygatePaymentModal({
         return;
       }
 
-      // Redirect Flow: Get AuthenticationRedirectUrl or hosted checkout URL and redirect user's browser
       const redirectUrl =
         data.data?.AuthenticationRedirectUrl ||
         `/payment/return?Reply=000&TransID=${data.data?.TransactionId || "7306453"}&Amount=${numAmount}&Currency=USD`;
@@ -80,7 +79,7 @@ export default function EzzygatePaymentModal({
               <ShieldCheck className="h-6 w-6" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-950 sm:text-xl">Ezzygate Hosted Payment</h2>
+              <h2 className="text-lg font-bold text-slate-950 sm:text-xl">Secure Hosted Payment</h2>
               <p className="text-xs text-slate-500">Secure 3D Redirect Flow</p>
             </div>
           </div>
@@ -98,9 +97,9 @@ export default function EzzygatePaymentModal({
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-sky-600 animate-pulse">
               <ArrowUpRight className="h-8 w-8" />
             </div>
-            <h3 className="mt-4 text-xl font-bold text-slate-900">Redirecting to Ezzygate...</h3>
+            <h3 className="mt-4 text-xl font-bold text-slate-900">Redirecting to Payment Gateway...</h3>
             <p className="mt-2 text-sm text-slate-600">
-              You are being securely transferred to the Ezzygate 3D Secure Hosted Payment page.
+              You are being securely transferred to the 3D Secure Hosted Payment page.
             </p>
           </div>
         ) : (
@@ -161,7 +160,7 @@ export default function EzzygatePaymentModal({
             <div className="rounded-xl border border-sky-100 bg-sky-50/60 p-3.5 text-xs text-sky-950">
               <p className="font-semibold">Hosted Payment Notice:</p>
               <p className="mt-1 text-slate-600">
-                Card details are entered securely on the Ezzygate 3D Secure hosted gateway page. No payment card data touches this site.
+                Card details are entered securely on the 3D Secure hosted gateway page. No payment card data touches this site.
               </p>
             </div>
 
@@ -175,7 +174,7 @@ export default function EzzygatePaymentModal({
             <div className="pt-2">
               <Button fullWidth type="submit" disabled={loading}>
                 <ExternalLink className="mr-2 h-4 w-4" />
-                {loading ? "Preparing redirect..." : `Proceed to Ezzygate ($${amount})`}
+                {loading ? "Preparing redirect..." : `Proceed to Payment ($${amount})`}
               </Button>
             </div>
 
