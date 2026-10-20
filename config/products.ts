@@ -49,8 +49,8 @@ export const products: ProductConfig[] = [
       "Fast, cost-efficient proxies for high-volume public data workflows, automation and QA.",
     longDescription:
       "Datacenter proxies are built for throughput. Use them when speed, low latency and predictable pricing matter more than residential network characteristics.",
-    startingPriceLabel: "from €1.09/day or €1.60/GB",
-    pricing: ["€1.09/day", "€1.60/GB"],
+    startingPriceLabel: "€20 · €25 · €50 · €100 packages",
+    pricing: ["Daily packages", "Traffic packages"],
     features: ["High speed", "Low latency", "Dedicated or shared options", "Country selection", "Pay-per-day and pay-per-GB"],
     protocols: ["HTTP", "SOCKS5"],
     rotationSupport: "Static and rotating options",
@@ -71,8 +71,8 @@ export const products: ProductConfig[] = [
       "Stable long-session residential-style IPs for monitoring tools, account workflows and business operations.",
     longDescription:
       "Static ISP proxies provide a consistent IP identity with a residential-style trust profile. They are best when long sessions and predictable endpoints are more important than large rotating pools.",
-    startingPriceLabel: "from €1.39/day or €3.49/GB",
-    pricing: ["€1.39/day", "€3.49/GB"],
+    startingPriceLabel: "€20 · €25 · €50 · €100 packages",
+    pricing: ["Daily packages", "Traffic packages"],
     features: ["Stable IP identity", "Long sessions", "Country targeting", "Daily and monthly options", "ISP/residential trust profile"],
     protocols: ["HTTP", "SOCKS5"],
     rotationSupport: "Sticky sessions",
@@ -93,8 +93,8 @@ export const products: ProductConfig[] = [
       "Rotating residential proxy pool for public web data, research and geo-specific access.",
     longDescription:
       "Residential proxies route requests through a flexible pool with country targeting and sticky session options. They are suited to distributed public data collection and regional research.",
-    startingPriceLabel: "from €2.19/GB",
-    pricing: ["€2.19/GB"],
+    startingPriceLabel: "€20 · €25 · €50 · €100 packages",
+    pricing: ["Traffic packages"],
     features: ["Rotating IP pool", "Sticky sessions", "Country targeting", "Flexible bandwidth", "Good for research workflows"],
     protocols: ["HTTP", "SOCKS5"],
     rotationSupport: "Rotating and sticky sessions",
@@ -115,8 +115,8 @@ export const products: ProductConfig[] = [
       "High-trust 4G/5G mobile proxy workflows for mobile testing, ad verification and regional QA.",
     longDescription:
       "Mobile proxies route traffic through IP addresses associated with mobile carrier networks, which is the context mobile-targeted content and advertising is actually served in. Carrier and region targeting is available where the location supports it.",
-    startingPriceLabel: "from €5.99/day or €6.49/GB",
-    pricing: ["€5.99/day", "€6.49/GB"],
+    startingPriceLabel: "€20 · €25 · €50 · €100 packages",
+    pricing: ["Daily packages", "Traffic packages"],
     features: ["4G/5G networks", "Carrier targeting", "Manual and API rotation", "Daily and GB-based pricing", "High trust score"],
     protocols: ["HTTP", "SOCKS5"],
     rotationSupport: "Manual and API rotation",

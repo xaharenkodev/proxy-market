@@ -1,4 +1,4 @@
-import { convertFromEUR, convertToGBP, CurrencyCode } from "@/config/currency";
+import { CurrencyCode } from "@/config/currency";
 
 const PENDING_ORDER_KEY = "virenza_pending_order";
 
@@ -10,20 +10,6 @@ export interface PendingOrder {
   label: string;
   payload: Record<string, unknown>;
   createdAt: number;
-}
-
-/**
- * The single amount charged at checkout for one order. Currency rounding can
- * otherwise leave the order a cent short of its own price, so the charge is
- * nudged up until it fully covers it.
- */
-export function oneTimeChargeAmount(priceEUR: number, currency: CurrencyCode) {
-  const requiredGBP = convertFromEUR(priceEUR, "GBP");
-  let amount = convertFromEUR(priceEUR, currency);
-  for (let step = 0; step < 5 && convertToGBP(amount, currency) < requiredGBP; step += 1) {
-    amount = +(amount + 0.01).toFixed(2);
-  }
-  return amount;
 }
 
 export function savePendingOrder(order: Omit<PendingOrder, "createdAt">) {
@@ -63,8 +49,7 @@ export interface CompletedOrder {
  * confirms the payment, so it always runs once per completed payment.
  */
 export async function completePendingOrder(
-  userId: string,
-  displayCurrency: CurrencyCode
+  userId: string
 ): Promise<{ ok: true; order: CompletedOrder } | { ok: false; error: string } | null> {
   const pending = readPendingOrder();
   if (!pending) return null;
@@ -72,7 +57,7 @@ export async function completePendingOrder(
     const response = await fetch("/api/proxy-requests/create", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, displayCurrency, ...pending.payload }),
+      body: JSON.stringify({ userId, displayCurrency: pending.currency, ...pending.payload }),
     });
     const data = await response.json();
     if (!data.success) return { ok: false, error: data.error || "The order could not be created." };

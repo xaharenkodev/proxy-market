@@ -30,7 +30,7 @@ export default function PremiumHero() {
           >
             <span className="flex items-center gap-1.5 text-sky-700"><ShieldCheck size={15} /> Premium proxy marketplace</span>
             <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block" />
-            <span className="hidden sm:inline">Buy in EUR, GBP or USD</span>
+            <span className="hidden sm:inline">Packages from €20</span>
           </motion.div>
 
           <motion.h1

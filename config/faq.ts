@@ -33,7 +33,7 @@ export const faqItems: FAQItem[] = [
     category: "Billing",
     question: "How does billing work — is this a subscription?",
     answer:
-      "You pay for each package directly at checkout. Every purchase is a separate one-time payment for that specific order, with no subscription, no recurring billing, no automatic continuation and no prepaid credit to load in advance. When a package ends or its traffic is used, you place a new order if you want to continue. You buy in EUR, GBP or USD; your selected currency is used for checkout and your Invoice / Receipt, and the final amount is shown before you confirm.",
+      "You pay for each package directly at checkout. Every purchase is a separate one-time payment for that specific order, with no subscription, no recurring billing, no automatic continuation and no prepaid credit to load in advance. When a package ends or its traffic is used, you place a new order if you want to continue. Every package is sold at a fixed price of €20, €25, €50 or €100 and charged in EUR; the same amount appears on your Invoice / Receipt and is shown before you confirm.",
   },
   {
     category: "Billing",

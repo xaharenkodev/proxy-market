@@ -39,7 +39,7 @@ export default function CheckoutLegal({ className = "" }: { className?: string }
       <OneTimeNotice variant="checkout" className="mt-5" />
 
       <p className="mt-4 border-t border-slate-100 pt-4 text-xs leading-6 text-slate-500">
-        You can buy in EUR, GBP or USD. The final amount payable, including any applicable taxes, is shown before you
+        Packages are sold at fixed prices of €20, €25, €50 or €100 and charged in EUR. The final amount payable, including any applicable taxes, is shown before you
         confirm, and it is charged a single time. Proxy access is a digital service delivered on activation and expires
         at the end of the purchased access period or prepaid traffic without renewing — see the digital delivery and
         refund policies below for how cancellation rights apply.

@@ -7,8 +7,9 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import { pricingPlans } from "@/config/pricing";
 import { products, ProductId } from "@/config/products";
-import { formatCurrencyFromEUR } from "@/config/currency";
-import { billingModel, accessLabel } from "@/config/billing";
+import { formatAmount, formatCurrencyFromEUR } from "@/config/currency";
+import { billingModel } from "@/config/billing";
+import { getTemplateById, lowestUnitPriceEUR, PACKAGE_PRICES_EUR, packagePricesLabel, tierRangeLabel } from "@/config/packages";
 import OneTimeBadge from "@/components/ui/OneTimeBadge";
 import OneTimeNotice from "@/components/ui/OneTimeNotice";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -37,7 +38,7 @@ export default function PricingCards({
     <div>
       {showSwitcher && (
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-slate-600">Choose EUR, GBP or USD for prices, checkout and your Invoice / Receipt.</p>
+          <p className="text-sm text-slate-600">Packages are priced and charged in EUR. Pick GBP or USD to see approximate amounts.</p>
           <CurrencySwitcher />
         </div>
       )}
@@ -45,11 +46,7 @@ export default function PricingCards({
         {plans.map((plan) => {
           const product = products.find((item) => item.id === plan.productId);
           const href = product ? `/products/${product.slug}` : "/contact";
-          const rate = plan.amountEUR ? formatCurrencyFromEUR(plan.amountEUR, displayCurrency) : plan.price;
-          // The headline figure is the amount actually charged once at checkout;
-          // the per-day / per-GB rate stays as a secondary reference only.
-          const price = plan.totalEUR ? formatCurrencyFromEUR(plan.totalEUR, displayCurrency) : rate;
-          const isPriced = Boolean(plan.totalEUR);
+          const template = plan.packageId ? getTemplateById(plan.packageId) : undefined;
           return (
             <motion.div
               key={`${plan.productId}-${plan.name}`}
@@ -71,23 +68,29 @@ export default function PricingCards({
                 </div>
               </div>
               <div className="mt-5 sm:mt-6">
-                <div className="flex items-end gap-1">
-                  <span className="text-3xl font-bold text-slate-950 sm:text-4xl">{price}</span>
-                  <span className="pb-1 text-sm font-semibold text-slate-500">
-                    {isPriced ? "one-time" : plan.unit}
-                  </span>
-                </div>
-                {isPriced ? (
+                {template ? (
                   <>
-                    <p className="mt-1 text-sm font-semibold text-slate-600">
-                      {accessLabel(plan.accessDays, plan.packageGb)} · {rate}
-                      {plan.unit} equivalent
+                    {/* The headline is the smallest fixed amount charged once at checkout. */}
+                    <div className="flex items-end gap-1">
+                      <span className="pb-1 text-sm font-semibold text-slate-500">from</span>
+                      <span className="text-3xl font-bold text-slate-950 sm:text-4xl">{formatAmount(PACKAGE_PRICES_EUR[0], "EUR")}</span>
+                      <span className="pb-1 text-sm font-semibold text-slate-500">one-time</span>
+                    </div>
+                    <p className="mt-1 text-sm font-semibold text-slate-600">{packagePricesLabel} packages</p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {tierRangeLabel(template)} · from {formatAmount(lowestUnitPriceEUR(template), "EUR")}{template.priceUnit}
                     </p>
-                    <p className="mt-1 text-xs font-semibold text-emerald-700">{billingModel.priceHint}</p>
+                    {displayCurrency !== "EUR" && (
+                      <p className="mt-1 text-xs text-slate-500">≈ {formatCurrencyFromEUR(PACKAGE_PRICES_EUR[0], displayCurrency)} · charged in EUR</p>
+                    )}
                   </>
                 ) : (
-                  <p className="mt-1 text-xs font-semibold text-emerald-700">{billingModel.priceHint}</p>
+                  <div className="flex items-end gap-1">
+                    <span className="text-3xl font-bold text-slate-950 sm:text-4xl">{plan.price}</span>
+                    <span className="pb-1 text-sm font-semibold text-slate-500">{plan.unit}</span>
+                  </div>
                 )}
+                <p className="mt-1 text-xs font-semibold text-emerald-700">{billingModel.priceHint}</p>
               </div>
               <div className="mt-4 flex flex-wrap gap-2 sm:mt-5">
                 {[plan.protocol, plan.rotation, plan.bandwidth].map((item) => (
@@ -127,7 +130,7 @@ export default function PricingCards({
               </h3>
               <p className="mt-3 text-sm leading-6 text-slate-600">
                 {index === 0
-                  ? "Use the dashboard configurator to model quantity, bandwidth, protocol, rotation and authentication."
+                  ? `Every package is sold at a fixed price: ${packagePricesLabel}. Location and protocol are chosen per order.`
                   : "Checkout, inventory and credential delivery can be connected without changing this visual flow."}
               </p>
               <div className="mt-5 flex flex-wrap gap-2">

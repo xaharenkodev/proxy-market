@@ -50,7 +50,7 @@ function OverviewContent() {
       </div>
       <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
         {[
-          { icon: Wallet, label: "Last order", value: "€128.40" },
+          { icon: Wallet, label: "Last order", value: "€50.00" },
           { icon: Server, label: "Active", value: "3" },
           { icon: Activity, label: "Traffic", value: "42 GB" },
           { icon: Globe2, label: "Locations", value: "18" },
@@ -95,8 +95,8 @@ function BuyContent() {
           { label: "Country", value: "United States" },
           { label: "Protocol", value: "HTTP" },
           { label: "Rotation", value: "Rotating" },
-          { label: "Bandwidth", value: "10 GB" },
-          { label: "Duration", value: "Monthly" },
+          { label: "Bandwidth", value: "12 GB" },
+          { label: "Package", value: "€20" },
         ].map(({ label, value }) => (
           <div key={label} className="rounded-xl border border-slate-200 bg-white p-3 sm:rounded-2xl sm:p-4">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{label}</p>
@@ -106,7 +106,7 @@ function BuyContent() {
       </div>
       <div className="rounded-[1.5rem] bg-[linear-gradient(135deg,#0f172a,#075985)] p-4 text-white">
         <p className="text-xs text-sky-200">Estimated total</p>
-        <p className="mt-1 text-2xl font-bold sm:text-3xl">€16.00</p>
+        <p className="mt-1 text-2xl font-bold sm:text-3xl">€20.00</p>
         <p className="mt-1 text-xs text-sky-200">Frontend planning price</p>
       </div>
     </div>

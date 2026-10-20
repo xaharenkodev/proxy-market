@@ -88,7 +88,7 @@ export default function ProductPage({ product }: { product: ProductConfig }) {
                   description={product.description}
                 />
                 <div className="mt-6 rounded-2xl border border-sky-100 bg-sky-50/80 p-4 text-sm leading-6 text-sky-950 sm:rounded-3xl sm:p-5">
-                  Buy this product in EUR, GBP or USD. Your selected checkout currency is reflected on the Invoice / Receipt.
+                  Buy this product as a fixed package of €20, €25, €50 or €100. Packages are charged in EUR, and the same amount appears on your Invoice / Receipt.
                 </div>
               </div>
             </Reveal>
@@ -142,7 +142,7 @@ export default function ProductPage({ product }: { product: ProductConfig }) {
                   align="left"
                   eyebrow="Pricing"
                   title="One-time prices, no subscription"
-                  description="Every plan below is bought once: you pay a single amount, access runs for the purchased period or prepaid traffic, and nothing renews automatically. Choose EUR, GBP or USD for product pricing, checkout and your Invoice / Receipt."
+                  description="Every plan below is bought once: you pay a single amount, access runs for the purchased period or prepaid traffic, and nothing renews automatically. Packages cost €20, €25, €50 or €100 and are charged in EUR."
                 />
               </Reveal>
               <div className="mt-8">

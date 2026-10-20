@@ -3,21 +3,14 @@
 import Badge from "@/components/ui/Badge";
 import { TableShell, Td, Th } from "@/components/ui/Table";
 import { pricingPlans } from "@/config/pricing";
-import { formatCurrencyFromEUR } from "@/config/currency";
-import { useCurrency } from "@/context/CurrencyContext";
-import CurrencySwitcher from "./CurrencySwitcher";
+import { formatAmount } from "@/config/currency";
 import OneTimeNotice from "@/components/ui/OneTimeNotice";
-import { accessLabel } from "@/config/billing";
+import { getTemplateById, lowestUnitPriceEUR, packagePricesLabel, tierRangeLabel } from "@/config/packages";
 
 export default function PricingComparison() {
-  const { displayCurrency } = useCurrency();
-
   return (
     <div>
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-slate-600">Prices and checkout use the selected currency: EUR, GBP or USD.</p>
-        <CurrencySwitcher />
-      </div>
+      <p className="mb-5 text-sm text-slate-600">Every package is sold at a fixed price of {packagePricesLabel}, charged in EUR.</p>
       <TableShell>
         <thead>
           <tr>
@@ -31,21 +24,18 @@ export default function PricingComparison() {
           </tr>
         </thead>
         <tbody>
-          {pricingPlans.map((plan) => (
+          {pricingPlans.map((plan) => {
+            const template = plan.packageId ? getTemplateById(plan.packageId) : undefined;
+            return (
             <tr key={`${plan.productId}-${plan.name}`}>
               <Td><span className="font-bold text-slate-950 whitespace-nowrap">{plan.name}</span></Td>
               <Td>
-                {plan.amountEUR ? (
+                {template ? (
                   <div>
-                    <span className="block font-bold text-slate-950 whitespace-nowrap">
-                      {formatCurrencyFromEUR(plan.totalEUR ?? plan.amountEUR, displayCurrency)}
-                      {plan.totalEUR ? " one-time" : ` ${plan.unit}`}
+                    <span className="block font-bold text-slate-950 whitespace-nowrap">{packagePricesLabel}</span>
+                    <span className="block text-xs text-slate-500 whitespace-nowrap">
+                      {tierRangeLabel(template)} · from {formatAmount(lowestUnitPriceEUR(template), "EUR")}{template.priceUnit}
                     </span>
-                    {plan.totalEUR ? (
-                      <span className="block text-xs text-slate-500 whitespace-nowrap">
-                        {accessLabel(plan.accessDays, plan.packageGb)} · {formatCurrencyFromEUR(plan.amountEUR, displayCurrency)}{plan.unit}
-                      </span>
-                    ) : null}
                   </div>
                 ) : (
                   <Badge variant="warning">Coming Soon</Badge>
@@ -59,7 +49,8 @@ export default function PricingComparison() {
               <Td>{plan.rotation}</Td>
               <Td>{plan.bandwidth}</Td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </TableShell>
       <OneTimeNotice className="mt-5" />

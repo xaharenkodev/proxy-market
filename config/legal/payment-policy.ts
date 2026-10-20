@@ -25,7 +25,7 @@ export const paymentPolicy: LegalDoc = {
     {
       title: "Pricing, Currency and Taxes",
       blocks: [
-        { type: "p", text: "The price, currency and applicable unit or package details are shown before confirmation. You choose whether you are charged in EUR, GBP or USD; the final amount and settlement currency are those shown at checkout and on your Invoice / Receipt." },
+        { type: "p", text: "The price, currency and applicable unit or package details are shown before confirmation. Packages are sold at fixed prices of €20, €25, €50 or €100 and charged in EUR. Amounts shown in GBP or USD are approximate and for reference only; the final amount and settlement currency are those shown at checkout and on your Invoice / Receipt." },
         { type: "p", text: "Prices may exclude applicable taxes unless stated otherwise. You are responsible for taxes, duties and bank, card-issuer or currency-conversion charges that apply to you." },
       ],
     },

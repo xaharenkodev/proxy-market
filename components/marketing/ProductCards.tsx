@@ -7,39 +7,29 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import { products } from "@/config/products";
 import { pricingPlans } from "@/config/pricing";
-import { formatCurrencyFromEUR } from "@/config/currency";
-import { useCurrency } from "@/context/CurrencyContext";
+import { formatAmount } from "@/config/currency";
+import { getTemplateById, lowestUnitPriceEUR, packagePricesLabel } from "@/config/packages";
 import { StaggerContainer, StaggerItem } from "@/components/animations/StaggerContainer";
-import { SupportedCurrency } from "@/config/site";
 import { billingModel } from "@/config/billing";
 import OneTimeBadge from "@/components/ui/OneTimeBadge";
 import OneTimeNotice from "@/components/ui/OneTimeNotice";
 
-/** Cheapest single charge for this product, or null when it is not on sale yet. */
-function productOneTimeFrom(productId: string, currency: SupportedCurrency) {
-  const totals = pricingPlans
-    .filter((plan) => plan.productId === productId && plan.totalEUR)
-    .map((plan) => plan.totalEUR as number);
-  if (!totals.length) return null;
-  return formatCurrencyFromEUR(Math.min(...totals), currency);
-}
-
-/** Per-day / per-GB rates, kept as a secondary reference under the total. */
-function productRateLabel(productId: string, fallback: string, currency: SupportedCurrency) {
-  const plans = pricingPlans.filter((plan) => plan.productId === productId && plan.amountEUR);
-  if (!plans.length) return fallback;
-  return plans.map((plan) => `${formatCurrencyFromEUR(plan.amountEUR || 0, currency)}${plan.unit}`).join(" / ");
+/** Lowest per-day / per-GB rates, or null when the product is not on sale yet. */
+function productRateLabel(productId: string) {
+  const templates = pricingPlans
+    .filter((plan) => plan.productId === productId && plan.packageId)
+    .map((plan) => getTemplateById(plan.packageId!))
+    .filter((template) => template !== undefined);
+  if (!templates.length) return null;
+  return templates.map((template) => `${formatAmount(lowestUnitPriceEUR(template), "EUR")}${template.priceUnit}`).join(" / ");
 }
 
 export default function ProductCards() {
-  const { displayCurrency } = useCurrency();
-
   return (
     <StaggerContainer className="grid gap-4 sm:gap-5 sm:grid-cols-2 xl:grid-cols-3">
       {products.map((product) => {
         const Icon = product.icon;
-        const oneTimeFrom = productOneTimeFrom(product.id, displayCurrency);
-        const rateLabel = productRateLabel(product.id, product.startingPriceLabel, displayCurrency);
+        const rateLabel = productRateLabel(product.id);
         return (
           <StaggerItem key={product.id}>
             <motion.div
@@ -64,12 +54,12 @@ export default function ProductCards() {
                 <p className="mt-2 text-sm leading-6 text-slate-600 sm:mt-3">{product.description}</p>
                 <div className="mt-4 rounded-xl border border-slate-200 bg-white/75 p-3 sm:mt-5 sm:rounded-2xl sm:p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    {oneTimeFrom ? "One-time purchase from" : "Availability"}
+                    {rateLabel ? "Fixed-price packages" : "Availability"}
                   </p>
                   <p className="mt-1 text-base font-bold text-sky-700 sm:text-lg">
-                    {oneTimeFrom || product.startingPriceLabel}
+                    {rateLabel ? packagePricesLabel : product.startingPriceLabel}
                   </p>
-                  {oneTimeFrom && <p className="mt-1 text-xs font-semibold text-slate-500">{rateLabel} equivalent</p>}
+                  {rateLabel && <p className="mt-1 text-xs font-semibold text-slate-500">from {rateLabel}</p>}
                   <p className="mt-1.5 text-xs font-semibold text-emerald-700">{billingModel.priceHint}</p>
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2 sm:mt-4">

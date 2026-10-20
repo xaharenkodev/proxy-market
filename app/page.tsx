@@ -27,7 +27,7 @@ const steps = [
   ["01", "Create account", "Sign up in under a minute and land straight in the proxy configurator."],
   ["02", "Choose network type", "Pick datacenter, static ISP, residential or mobile based on the workflow."],
   ["03", "Tune targeting", "Select country, optional city or carrier, protocol and authentication method."],
-  ["04", "Review pricing", "Choose EUR, GBP or USD and see the exact price before you confirm."],
+  ["04", "Review pricing", "Pick a fixed package of €20, €25, €50 or €100 and see exactly what it includes before you confirm."],
   ["05", "Start routing traffic", "Receive your credentials and point your tooling at the endpoint."],
 ];
 
@@ -39,7 +39,7 @@ const features = [
   { icon: KeyRound, title: "Username/password auth", text: "Rotate credentials from the dashboard without redeploying your tooling." },
   { icon: Globe2, title: "Country targeting", text: "Choose the exit country so region-gated content resolves as a local visitor sees it." },
   { icon: BarChart3, title: "Usage analytics", text: "Track bandwidth, requests and active sessions before a runaway job becomes an invoice." },
-  { icon: CreditCard, title: "Pay per order", text: "Buy each proxy package on its own in EUR, GBP or USD. One payment, no stored funds." },
+  { icon: CreditCard, title: "Pay per order", text: "Buy each proxy package on its own at a fixed price of €20, €25, €50 or €100. One payment, no stored funds." },
 ];
 
 export default function Home() {
@@ -85,7 +85,7 @@ export default function Home() {
             <SectionHeader
               eyebrow="Pricing"
               title="One-time proxy pricing"
-              description="Pay once per order — no subscription, no auto-renewal, nothing to prepay. Choose the currency you are charged in at checkout."
+              description="Pay once per order — no subscription, no auto-renewal, nothing to prepay. Every package costs €20, €25, €50 or €100."
             />
           </Reveal>
           <div className="mt-10">
@@ -106,7 +106,7 @@ export default function Home() {
                   description="Configure the network type, targeting and protocol you need, then route your traffic through it."
                 />
                 <div className="mt-6 rounded-2xl border border-sky-100 bg-sky-50/80 p-4 text-sm leading-6 text-sky-950 sm:rounded-3xl sm:p-5">
-                  Custom proxy setups are reviewed by our team before activation. Most orders are provisioned within a few minutes to a few hours.
+                  Every order is reviewed by our team before activation. Most orders are provisioned within a few minutes to a few hours.
                 </div>
               </div>
             </Reveal>

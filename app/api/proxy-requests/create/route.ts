@@ -4,16 +4,9 @@ import mongoose from "mongoose";
 import { connectDB } from "@/src/lib/db/mongoose";
 import User, { IProxyRequest, ITransaction, toSafeUser } from "@/src/lib/db/models/User";
 import { sendProxyRequestConfirmation, sendProxyRequestNotification } from "@/src/lib/email/resend";
-import { getTemplateById } from "@/config/packages";
+import { getTemplateById, getTier, tierAccessLabel } from "@/config/packages";
 import { getLocationByCountry } from "@/config/locations";
 import { convertFromEUR } from "@/config/currency";
-import { calculateProxyPrice, ProxyDuration } from "@/src/lib/pricing";
-
-const validProxyTypes = ["datacenter", "static-residential", "residential", "mobile"];
-const validProtocols = ["HTTP", "SOCKS5"];
-const validRotations = ["rotating", "sticky"];
-const validAuthMethods = ["Username/password", "IP whitelist"];
-const validDurations: ProxyDuration[] = ["daily", "weekly", "monthly", "pay-per-gb"];
 
 function invoiceNumber(reference: string) {
   return `INV-${new Date().toISOString().slice(0, 10).replaceAll("-", "")}-${reference.slice(-8).toUpperCase()}`;
@@ -39,83 +32,41 @@ export async function POST(request: Request) {
     const body = await request.json();
     const userId = String(body.userId || "");
 
-    let proxyRequest: IProxyRequest;
-    if (body.requestKind === "ready-package") {
-      const template = getTemplateById(String(body.packageId || ""));
-      if (!template) return NextResponse.json({ success: false, error: "Invalid package ID." }, { status: 400 });
-      const { location, city, carrier } = validLocation(body.country, body.city, body.carrier);
-      if (!location.products.includes(template.productLabel)) return NextResponse.json({ success: false, error: `${template.productLabel} proxies are not available in ${location.country}.` }, { status: 400 });
-      const durationQuantity = template.duration === "pay-per-gb" ? template.bandwidthGb : template.durationDays || 1;
-      const pricing = calculateProxyPrice({ proxyType: template.proxyType, duration: template.duration as ProxyDuration, quantity: template.quantity, durationQuantity, bandwidthGb: template.bandwidthGb });
-      const reference = `PRX-${Date.now()}-${crypto.randomUUID().slice(0, 5)}`;
-      proxyRequest = {
-        id: reference,
-        requestKind: "ready-package",
-        packageName: template.name,
-        proxyType: template.proxyType,
-        country: location.country,
-        city,
-        carrier,
-        protocol: template.protocol,
-        rotation: template.rotation,
-        authMethod: template.authMethod,
-        quantity: template.quantity,
-        bandwidthGb: template.bandwidthGb,
-        duration: template.duration,
-        durationQuantity,
-        estimatedPriceEUR: pricing.estimatedPriceEUR,
-        priceGBP: convertFromEUR(pricing.estimatedPriceEUR, "GBP"),
-        displayCurrency: validCurrency(body.displayCurrency),
-        status: "paid",
-        invoiceNumber: invoiceNumber(reference),
-        invoiceIssuedAt: new Date(),
-        emailStatus: "pending",
-        paidAt: new Date(),
-        createdAt: new Date(),
-      };
-    } else {
-      const proxyType = String(body.proxyType || "");
-      const duration = body.duration as ProxyDuration;
-      const quantity = Math.floor(Number(body.quantity));
-      const durationQuantity = Math.floor(Number(body.durationQuantity));
-      const bandwidthGb = Number(body.bandwidthGb || 0);
-      if (!validProxyTypes.includes(proxyType)) return NextResponse.json({ success: false, error: "Valid proxy type is required." }, { status: 400 });
-      if (!validDurations.includes(duration)) return NextResponse.json({ success: false, error: "Valid plan duration is required." }, { status: 400 });
-      if (!validProtocols.includes(body.protocol)) return NextResponse.json({ success: false, error: "Valid protocol is required." }, { status: 400 });
-      if (!validRotations.includes(body.rotation)) return NextResponse.json({ success: false, error: "Valid rotation type is required." }, { status: 400 });
-      if (!validAuthMethods.includes(body.authMethod)) return NextResponse.json({ success: false, error: "Valid authentication method is required." }, { status: 400 });
-      if (!Number.isInteger(quantity) || quantity < 1 || !Number.isInteger(durationQuantity) || durationQuantity < 1) return NextResponse.json({ success: false, error: "Quantity and plan length must be at least 1." }, { status: 400 });
-      if (duration === "pay-per-gb" && (!Number.isFinite(bandwidthGb) || bandwidthGb < 1)) return NextResponse.json({ success: false, error: "Bandwidth must be at least 1 GB." }, { status: 400 });
-      const { location, city, carrier } = validLocation(body.country, body.city, body.carrier);
-      const productLabel = proxyType === "static-residential" ? "Static ISP" : proxyType.charAt(0).toUpperCase() + proxyType.slice(1);
-      if (!location.products.includes(productLabel)) return NextResponse.json({ success: false, error: `${productLabel} proxies are not available in ${location.country}.` }, { status: 400 });
-      const pricing = calculateProxyPrice({ proxyType, duration, quantity, durationQuantity, bandwidthGb });
-      const reference = `PRX-${Date.now()}-${crypto.randomUUID().slice(0, 5)}`;
-      proxyRequest = {
-        id: reference,
-        requestKind: "custom",
-        proxyType,
-        country: location.country,
-        city,
-        carrier,
-        protocol: body.protocol,
-        rotation: body.rotation,
-        authMethod: body.authMethod,
-        quantity,
-        bandwidthGb: duration === "pay-per-gb" ? bandwidthGb : 0,
-        duration,
-        durationQuantity,
-        estimatedPriceEUR: pricing.estimatedPriceEUR,
-        priceGBP: convertFromEUR(pricing.estimatedPriceEUR, "GBP"),
-        displayCurrency: validCurrency(body.displayCurrency),
-        status: "paid",
-        invoiceNumber: invoiceNumber(reference),
-        invoiceIssuedAt: new Date(),
-        emailStatus: "pending",
-        paidAt: new Date(),
-        createdAt: new Date(),
-      };
-    }
+    // Only fixed-price packages are sold, so every order costs exactly one of
+    // the standard package amounts.
+    if (body.requestKind !== "ready-package") return NextResponse.json({ success: false, error: "Choose one of the ready packages." }, { status: 400 });
+    const template = getTemplateById(String(body.packageId || ""));
+    if (!template) return NextResponse.json({ success: false, error: "Invalid package ID." }, { status: 400 });
+    const tier = getTier(template, Number(body.priceEUR));
+    if (!tier) return NextResponse.json({ success: false, error: "Invalid package price." }, { status: 400 });
+    const { location, city, carrier } = validLocation(body.country, body.city, body.carrier);
+    if (!location.products.includes(template.productLabel)) return NextResponse.json({ success: false, error: `${template.productLabel} proxies are not available in ${location.country}.` }, { status: 400 });
+    const reference = `PRX-${Date.now()}-${crypto.randomUUID().slice(0, 5)}`;
+    const proxyRequest: IProxyRequest = {
+      id: reference,
+      requestKind: "ready-package",
+      packageName: `${template.name} — ${tierAccessLabel(template, tier)}`,
+      proxyType: template.proxyType,
+      country: location.country,
+      city,
+      carrier,
+      protocol: template.protocol,
+      rotation: template.rotation,
+      authMethod: template.authMethod,
+      quantity: template.quantity,
+      bandwidthGb: template.duration === "pay-per-gb" ? tier.amount : 0,
+      duration: template.duration,
+      durationQuantity: tier.amount,
+      estimatedPriceEUR: tier.priceEUR,
+      priceGBP: convertFromEUR(tier.priceEUR, "GBP"),
+      displayCurrency: validCurrency(body.displayCurrency),
+      status: "paid",
+      invoiceNumber: invoiceNumber(reference),
+      invoiceIssuedAt: new Date(),
+      emailStatus: "pending",
+      paidAt: new Date(),
+      createdAt: new Date(),
+    };
 
     let isDbConnected = false;
     try {

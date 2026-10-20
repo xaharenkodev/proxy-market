@@ -3,15 +3,11 @@ import { products, ProductId } from "./products";
 export interface PricingPlan {
   productId: ProductId;
   name: string;
-  amountEUR?: number;
-  price: string;
-  unit: string;
-  /** Access period covered by a single one-time payment (day-based plans). */
-  accessDays?: number;
-  /** Prepaid traffic covered by a single one-time payment (GB-based plans). */
-  packageGb?: number;
-  /** Full amount charged once at checkout. Never recurring. */
-  totalEUR?: number;
+  /** Ready package sold for this plan at the fixed amounts in PACKAGE_PRICES_EUR. */
+  packageId?: string;
+  /** Shown instead of a price while the plan is not on sale. */
+  price?: string;
+  unit?: string;
   bestFor: string;
   protocol: string;
   rotation: string;
@@ -25,11 +21,7 @@ export const pricingPlans: PricingPlan[] = [
   {
     productId: "datacenter",
     name: "Datacenter Daily",
-    amountEUR: 1.09,
-    price: "€1.09",
-    unit: "/day",
-    accessDays: 30,
-    totalEUR: 32.7,
+    packageId: "datacenter-daily",
     bestFor: "Speed-focused public data workflows",
     protocol: "HTTP / SOCKS5",
     rotation: "Static or rotating",
@@ -39,11 +31,7 @@ export const pricingPlans: PricingPlan[] = [
   {
     productId: "datacenter",
     name: "Datacenter GB",
-    amountEUR: 1.6,
-    price: "€1.60",
-    unit: "/GB",
-    packageGb: 10,
-    totalEUR: 16,
+    packageId: "datacenter-traffic",
     bestFor: "Flexible traffic-based usage",
     protocol: "HTTP / SOCKS5",
     rotation: "Pool-based",
@@ -53,11 +41,7 @@ export const pricingPlans: PricingPlan[] = [
   {
     productId: "static-residential",
     name: "Static ISP",
-    amountEUR: 1.39,
-    price: "€1.39",
-    unit: "/day",
-    accessDays: 30,
-    totalEUR: 41.7,
+    packageId: "static-isp-daily",
     bestFor: "Stable long-session workflows",
     protocol: "HTTP / SOCKS5",
     rotation: "Sticky",
@@ -68,11 +52,7 @@ export const pricingPlans: PricingPlan[] = [
   {
     productId: "static-residential",
     name: "Static ISP GB",
-    amountEUR: 3.49,
-    price: "€3.49",
-    unit: "/GB",
-    packageGb: 5,
-    totalEUR: 17.45,
+    packageId: "static-isp-traffic",
     bestFor: "Residential-style traffic without commitment",
     protocol: "HTTP / SOCKS5",
     rotation: "Sticky",
@@ -82,11 +62,7 @@ export const pricingPlans: PricingPlan[] = [
   {
     productId: "residential",
     name: "Residential Pool",
-    amountEUR: 2.19,
-    price: "€2.19",
-    unit: "/GB",
-    packageGb: 5,
-    totalEUR: 10.95,
+    packageId: "residential-traffic",
     bestFor: "Distributed public web data",
     protocol: "HTTP / SOCKS5",
     rotation: "Rotating / sticky",
@@ -96,11 +72,7 @@ export const pricingPlans: PricingPlan[] = [
   {
     productId: "mobile",
     name: "Mobile Daily",
-    amountEUR: 5.99,
-    price: "€5.99",
-    unit: "/day",
-    accessDays: 30,
-    totalEUR: 179.7,
+    packageId: "mobile-daily",
     bestFor: "Mobile QA and ad verification",
     protocol: "HTTP / SOCKS5",
     rotation: "Manual / API",
@@ -110,11 +82,7 @@ export const pricingPlans: PricingPlan[] = [
   {
     productId: "mobile",
     name: "Mobile GB",
-    amountEUR: 6.49,
-    price: "€6.49",
-    unit: "/GB",
-    packageGb: 2,
-    totalEUR: 12.98,
+    packageId: "mobile-traffic",
     bestFor: "Flexible mobile network traffic",
     protocol: "HTTP / SOCKS5",
     rotation: "Manual / API",

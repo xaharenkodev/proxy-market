@@ -66,7 +66,7 @@ export default function DashboardOrdersPage() {
       ) : (
         <EmptyState
           title="No proxy requests yet"
-          description="Choose a ready package or configure a custom setup. Our team will review and contact you to confirm."
+          description="Choose a ready package at a fixed price. Our team will review and contact you to confirm."
           ctaHref="/dashboard/buy"
           ctaLabel="Submit a request"
         />

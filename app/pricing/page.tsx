@@ -20,7 +20,7 @@ export default function PricingPage() {
                 align="left"
                 eyebrow="Pricing"
                 title="One-time proxy pricing, no subscriptions"
-                description="Every plan is a one-time purchase: you pay once, access runs for the period or traffic you bought, and nothing renews automatically. Compare every proxy category and buy in EUR, GBP or USD — the selected currency is used at checkout and on your Invoice / Receipt."
+                description="Every plan is a one-time purchase: you pay once, access runs for the period or traffic you bought, and nothing renews automatically. Every package is sold at a fixed price of €20, €25, €50 or €100, charged in EUR, and the same amount appears on your Invoice / Receipt."
               />
             </Reveal>
             <Reveal delay={0.1}>

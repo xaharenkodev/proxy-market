@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import { ArrowRight, CheckCircle2, Clock3, ShieldCheck } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { useAuth } from "@/context/AuthContext";
-import { useCurrency } from "@/context/CurrencyContext";
 import { completePendingOrder } from "@/config/checkout";
 
 type PaymentState = "checking" | "approved" | "pending" | "failed" | "error";
@@ -14,7 +13,6 @@ type PaymentState = "checking" | "approved" | "pending" | "failed" | "error";
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
   const { user, updateUser } = useAuth();
-  const { displayCurrency } = useCurrency();
   const attempt = searchParams.get("attempt");
   const [state, setState] = useState<PaymentState>("checking");
   const [transactionId, setTransactionId] = useState("");
@@ -36,7 +34,7 @@ function PaymentSuccessContent() {
           updateUser(data.user);
           setTransactionId(data.transactionId || "");
           // The payment is confirmed, so place the order it was paid for.
-          const placed = await completePendingOrder(user._id, displayCurrency);
+          const placed = await completePendingOrder(user._id);
           if (placed?.ok) {
             updateUser(placed.order.user as never);
             setOrderId(placed.order.id);
@@ -61,7 +59,7 @@ function PaymentSuccessContent() {
     };
     check();
     return () => { active = false; };
-  }, [attempt, cannotCheckPayment, displayCurrency, updateUser, user]);
+  }, [attempt, cannotCheckPayment, updateUser, user]);
 
   const content = {
     checking: {
