@@ -3,9 +3,13 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "@/src/lib/db/mongoose";
 import User, { toSafeUser } from "@/src/lib/db/models/User";
 import { sendWelcomeEmail } from "@/src/lib/email/resend";
+import { registrationGuard } from "@/src/lib/registrationGuard";
 
 export async function POST(request: Request) {
   try {
+    const blocked = await registrationGuard(request);
+    if (blocked) return blocked;
+
     const body = await request.json();
     const { email, password, name, surname, phoneNumber, dateOfBirth, address } =
       body;
